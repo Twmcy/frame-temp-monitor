@@ -11,11 +11,11 @@
         app:title="@string/overlay_show"/>
 
         <SwitchPreferenceCompat
-            app:key="frame rate"
+            app:key="frame_rate"
             app:title="@string/fps_show" />
 
         <SwitchPreferenceCompat
-            app:key="battery temperature"
+            app:key="battery_temperature"
             app:title="@string/temp_show" />
 
     </PreferenceCategory>
