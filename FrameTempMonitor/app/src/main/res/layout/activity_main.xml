@@ -38,4 +38,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/baseline_settings_24" />
 
+    <Button
+        android:id="@+id/overlayButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="483dp" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
