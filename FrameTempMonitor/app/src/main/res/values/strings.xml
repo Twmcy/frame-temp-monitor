@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">FrameTemp Monitor</string>
+    <string name="frames_per_second">Frames per Second: %s</string>
+    <string name="battery_temp">Battery temperature: %.1f\u00B0C</string>
 </resources>
