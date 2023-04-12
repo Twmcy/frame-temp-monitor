@@ -1,5 +1,16 @@
 <resources>
     <string name="app_name">FrameTemp Monitor</string>
+    <!-- Main Activity -->
     <string name="frames_per_second">Frames per Second: %s</string>
     <string name="battery_temp">Battery temperature: %.1f\u00B0C</string>
+
+    <!-- Settings Activity -->
+    <string name="overlay_header">Overlay Settings</string>
+    <string name="overlay_show">Show overlay</string>
+    <string name="fps_show">Show frame rate</string>
+    <string name="temp_show">Show battery temperature</string>
+
+    <string name="help_header">Help</string>
+    <string name="feedback_send">Send feedback</string>
+    <string name="feedback_summary">Report technical issues or suggest new features</string>
 </resources>

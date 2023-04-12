@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        app:key="overlay_category"
+        app:title="@string/overlay_header">
+
+    <SwitchPreferenceCompat
+        app:key="overlay"
+        app:title="@string/overlay_show"/>
+
+        <SwitchPreferenceCompat
+            app:key="frame_rate"
+            app:title="@string/fps_show" />
+
+        <SwitchPreferenceCompat
+            app:key="battery_temperature"
+            app:title="@string/temp_show" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:key="help_category"
+        app:title="@string/help_header">
+
+        <Preference
+            app:key="feedback"
+            app:summary="@string/feedback_summary"
+            app:title="@string/feedback_send"/>
+
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
