@@ -8,6 +8,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.Choreographer
 import android.widget.TextView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.nakkeez.frametempmonitor.preferences.SettingsActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,6 +24,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Set a button for navigating to SettingsActivity
+        val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
+        fabButton.setOnClickListener {
+            val intent = Intent(this, SettingsActivity::class.java)
+            startActivity(intent)
+        }
 
         Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
             override fun doFrame(frameTimeNanos: Long) {
