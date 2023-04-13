@@ -20,6 +20,9 @@ import com.nakkeez.frametempmonitor.service.OverlayService
 import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
 import kotlinx.coroutines.launch
 
+/**
+ * Main activity that calculates the frame rate and battery temperature.
+ */
 class MainActivity : AppCompatActivity() {
     var isOverlayVisible = false
 

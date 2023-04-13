@@ -1,32 +1,36 @@
 package com.nakkeez.frametempmonitor.service
 
-import android.app.Service
+import androidx.lifecycle.LifecycleService
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.PixelFormat
-import android.os.IBinder
 import android.util.DisplayMetrics
 import android.view.*
 import android.widget.TextView
 import com.nakkeez.frametempmonitor.MainActivity
+import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
 
-class OverlayService : Service(), View.OnTouchListener {
+/**
+ * Service for displaying an overlay with frame rate and battery
+ * temperature. It's a LifecycleService instead of Service
+ * so the overlay can be ViewModelStoreOwner use LiveData.
+ */
+class OverlayService : LifecycleService(), View.OnTouchListener {
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: View
+
     private var initialX: Int = 0
     private var initialY: Int = 0
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
+    // Instance of FrameTempViewModel
+    private lateinit var viewModel: FrameTempViewModel
 
     override fun onCreate() {
         super.onCreate()
 
         // Create a new view and set its layout parameters
         overlayView = TextView(this).apply {
-            text = "This is an overlay"
+            text = "Frame Rate: 0\nBattery Temp: 0" // Set initial text
             textSize = 24f
             setTextColor(Color.BLACK)
             setBackgroundColor(Color.LTGRAY)

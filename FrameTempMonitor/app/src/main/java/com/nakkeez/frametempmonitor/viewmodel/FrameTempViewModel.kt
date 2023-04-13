@@ -2,9 +2,14 @@ package com.nakkeez.frametempmonitor.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
+/**
+ * ViewModel for used to observe the frame rate and battery temperature
+ * values
+ */
 class FrameTempViewModel : ViewModel() {
 
     private val _frameRate = MutableLiveData<Float>()
