@@ -1,6 +1,5 @@
 package com.nakkeez.frametempmonitor
 
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
@@ -8,10 +7,8 @@ import android.os.BatteryManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
-import android.os.HandlerThread
 import android.provider.Settings
 import android.view.Choreographer
-import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
@@ -21,11 +18,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nakkeez.frametempmonitor.preferences.SettingsActivity
 import com.nakkeez.frametempmonitor.service.OverlayService
 import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
 

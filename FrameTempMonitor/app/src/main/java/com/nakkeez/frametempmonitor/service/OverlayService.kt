@@ -15,8 +15,6 @@ class OverlayService : Service(), View.OnTouchListener {
     private lateinit var overlayView: View
     private var initialX: Int = 0
     private var initialY: Int = 0
-    private var initialTouchX: Float = 0.toFloat()
-    private var initialTouchY: Float = 0.toFloat()
 
     override fun onBind(intent: Intent?): IBinder? {
         return null
@@ -42,7 +40,7 @@ class OverlayService : Service(), View.OnTouchListener {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         ).apply {
-            gravity = Gravity.TOP or Gravity.LEFT
+            gravity = Gravity.TOP or Gravity.START
         }
 
         // Get the window manager and add the view to the window
@@ -100,5 +98,4 @@ class OverlayService : Service(), View.OnTouchListener {
 
         return false
     }
-
 }

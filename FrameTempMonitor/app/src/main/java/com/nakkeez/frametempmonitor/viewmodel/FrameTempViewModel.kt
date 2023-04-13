@@ -24,15 +24,3 @@ class FrameTempViewModel : ViewModel() {
         _batteryTemp.value = temp
     }
 }
-
-class FrameTempViewModelFactory(private val fps: Float, private val temp: Float) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(FrameTempViewModel::class.java)) {
-            return FrameTempViewModel().apply {
-                updateFrameRate(fps)
-                updateBatteryTemp(temp)
-            } as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}
