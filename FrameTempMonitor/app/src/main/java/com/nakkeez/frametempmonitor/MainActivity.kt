@@ -21,6 +21,7 @@ import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
+    var isOverlayVisible = false
 
     // Variables for getting battery temperature
     private lateinit var handler: Handler
@@ -50,8 +51,17 @@ class MainActivity : AppCompatActivity() {
 
         val overlayButton = findViewById<Button>(R.id.overlayButton)
         overlayButton.setOnClickListener {
-            val intent = Intent(this, OverlayService::class.java)
-            startService(intent)
+            isOverlayVisible = if (isOverlayVisible) {
+                val intent = Intent(this, OverlayService::class.java)
+                stopService(intent)
+                overlayButton.text = getString(R.string.overlay_off)
+                false
+            } else {
+                val intent = Intent(this, OverlayService::class.java)
+                startService(intent)
+                overlayButton.text = getString(R.string.overlay_on)
+                true
+            }
         }
 
         if (!Settings.canDrawOverlays(this)) {

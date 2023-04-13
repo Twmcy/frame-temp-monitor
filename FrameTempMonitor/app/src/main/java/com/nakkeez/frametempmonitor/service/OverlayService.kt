@@ -6,9 +6,11 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.IBinder
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
 import android.widget.TextView
+import com.nakkeez.frametempmonitor.MainActivity
 
 class OverlayService : Service(), View.OnTouchListener {
     private lateinit var windowManager: WindowManager
@@ -46,16 +48,21 @@ class OverlayService : Service(), View.OnTouchListener {
         // Get the window manager and add the view to the window
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowManager.addView(overlayView, params)
-
-        Log.d("OverlayService", "View added to window")
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        // Remove the view from the window
-        windowManager.removeView(overlayView)
+        try {
+            // Remove the view from the window
+            windowManager.removeView(overlayView)
+
+            // Set isOverlayVisible to false
+            (applicationContext as MainActivity).isOverlayVisible = false
+        } catch (_: Exception) {}
     }
+
+
 
     override fun onTouch(view: View, event: MotionEvent): Boolean {
         when (event.action) {
@@ -76,6 +83,18 @@ class OverlayService : Service(), View.OnTouchListener {
 
                 // Reset the view's alpha to indicate that it is no longer being touched
                 view.alpha = 1.0f
+
+                // Get the screen height
+                val displayMetrics = DisplayMetrics()
+                windowManager.defaultDisplay.getMetrics(displayMetrics)
+                val screenHeight = displayMetrics.heightPixels
+
+                // Check if the view has moved out of the bottom of the screen
+                val layoutParams = view.layoutParams as WindowManager.LayoutParams
+                if (layoutParams.y + view.height > screenHeight) {
+                    // Remove the view from the window if it has moved out of the bottom of the screen
+                    windowManager.removeView(view)
+                }
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
