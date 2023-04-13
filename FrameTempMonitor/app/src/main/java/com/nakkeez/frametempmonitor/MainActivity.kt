@@ -1,5 +1,6 @@
 package com.nakkeez.frametempmonitor
 
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
@@ -12,24 +13,30 @@ import android.view.Choreographer
 import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nakkeez.frametempmonitor.preferences.SettingsActivity
 import com.nakkeez.frametempmonitor.service.OverlayService
+import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
 
 class MainActivity : AppCompatActivity() {
 
     // Variables for getting battery temperature
-    private lateinit var tempTextView: TextView
     private lateinit var handler: Handler
     private lateinit var runnable: Runnable
     // Variables to save frame rate
     private var frameCount = 0
     private var lastFrameTime: Long = 0
 
+    // Instance of FrameTempViewModel
+    private lateinit var viewModel: FrameTempViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        viewModel = ViewModelProvider(this)[FrameTempViewModel::class.java]
 
         // Set a button for navigating to SettingsActivity
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
@@ -39,6 +46,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         val fpsTextView = findViewById<TextView>(R.id.fpsTextView)
+        val tempTextView = findViewById<TextView>(R.id.tempTextView)
+
         // Get the value of preferences
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val showOverlay = sharedPreferences.getBoolean("overlay", true)
@@ -56,41 +65,42 @@ class MainActivity : AppCompatActivity() {
             // Launch the settings activity if the user prefers
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:" + packageName)
+                Uri.parse("package:$packageName")
             )
             startActivity(intent)
         }
 
-        // Show frame rate if preference is true
-        if (showFrameRate) {
-            Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
-                override fun doFrame(frameTimeNanos: Long) {
-                    // Calculate the frame rate
-                    val currentTime = System.nanoTime()
-                    val elapsedNanos = currentTime - lastFrameTime
-                    if (elapsedNanos > 1000000000) { // Update once per second
-                        val fps = frameCount * 1e9 / elapsedNanos
-                        frameCount = 0
-                        lastFrameTime = currentTime
-
-                        // Display the frame rate
-                        val fpsText = getString(R.string.frames_per_second, String.format("%.2f", fps))
-                        fpsTextView.text = fpsText
-                    }
-
-                    // Schedule the next frame
-                    frameCount++
-                    Choreographer.getInstance().postFrameCallback(this)
-                }
-            })
-            fpsTextView.visibility = View.VISIBLE
-        } else {
-            fpsTextView.visibility = View.GONE
+        // Observe the LiveData for the frame rate and update the TextView accordingly
+        viewModel.frameRate.observe(this) {
+            val fpsText = getString(R.string.frames_per_second, String.format("%.2f", it))
+            fpsTextView.text = fpsText
         }
 
-        tempTextView = findViewById(R.id.tempTextView)
+        // Observe the LiveData for the battery temperature and update the TextView accordingly
+        viewModel.batteryTemp.observe(this) {
+            tempTextView.text = getString(R.string.battery_temp, it)
+        }
 
-        // Show frame rate if preference is true
+        Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
+            override fun doFrame(frameTimeNanos: Long) {
+                // Calculate the frame rate
+                val currentTime = System.nanoTime()
+                val elapsedNanos = currentTime - lastFrameTime
+                if (elapsedNanos > 1000000000) { // Update once per second
+                    val fps = frameCount * 1e9 / elapsedNanos
+                    frameCount = 0
+                    lastFrameTime = currentTime
+
+                    // Update the frame rate value in the ViewModel
+                    viewModel.updateFrameRate(fps.toFloat())
+                }
+
+                // Schedule the next frame
+                frameCount++
+                Choreographer.getInstance().postFrameCallback(this)
+            }
+        })
+
         if (showBatteryTemp) {
             // Create a Handler and a Runnable to update the temperature every second
             handler = Handler()
@@ -106,8 +116,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             tempTextView.visibility = View.GONE
         }
-
-
     }
 
     override fun onDestroy() {
@@ -121,6 +129,6 @@ class MainActivity : AppCompatActivity() {
         val batteryIntent = applicationContext.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
         val temperature = batteryIntent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
         val temperatureInCelsius = temperature / 10f
-        tempTextView.text = getString(R.string.battery_temp, temperatureInCelsius)
+        viewModel.updateBatteryTemp(temperatureInCelsius)
     }
 }
