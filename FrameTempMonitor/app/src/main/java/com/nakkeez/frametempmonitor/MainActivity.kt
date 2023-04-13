@@ -9,27 +9,38 @@ import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
 import android.view.Choreographer
-import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nakkeez.frametempmonitor.preferences.SettingsActivity
 import com.nakkeez.frametempmonitor.service.OverlayService
+import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
+import kotlinx.coroutines.launch
 
+/**
+ * Main activity that calculates the frame rate and battery temperature.
+ */
 class MainActivity : AppCompatActivity() {
+    var isOverlayVisible = false
 
     // Variables for getting battery temperature
-    private lateinit var tempTextView: TextView
     private lateinit var handler: Handler
     private lateinit var runnable: Runnable
     // Variables to save frame rate
     private var frameCount = 0
     private var lastFrameTime: Long = 0
 
+    // Instance of FrameTempViewModel
+    private lateinit var viewModel: FrameTempViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        viewModel = ViewModelProvider(this)[FrameTempViewModel::class.java]
 
         // Set a button for navigating to SettingsActivity
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
@@ -39,16 +50,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         val fpsTextView = findViewById<TextView>(R.id.fpsTextView)
-        // Get the value of preferences
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val showOverlay = sharedPreferences.getBoolean("overlay", true)
-        val showFrameRate = sharedPreferences.getBoolean("frame_rate", true)
-        val showBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
+        val tempTextView = findViewById<TextView>(R.id.tempTextView)
 
         val overlayButton = findViewById<Button>(R.id.overlayButton)
         overlayButton.setOnClickListener {
-            val intent = Intent(this, OverlayService::class.java)
-            startService(intent)
+            isOverlayVisible = if (isOverlayVisible) {
+                val intent = Intent(this, OverlayService::class.java)
+                stopService(intent)
+                overlayButton.text = getString(R.string.overlay_off)
+                false
+            } else {
+                val intent = Intent(this, OverlayService::class.java)
+                startService(intent)
+                overlayButton.text = getString(R.string.overlay_on)
+                true
+            }
         }
 
         if (!Settings.canDrawOverlays(this)) {
@@ -56,12 +72,28 @@ class MainActivity : AppCompatActivity() {
             // Launch the settings activity if the user prefers
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:" + packageName)
+                Uri.parse("package:$packageName")
             )
             startActivity(intent)
         }
 
-        // Show frame rate if preference is true
+        // Get the value of preferences
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val showOverlay = sharedPreferences.getBoolean("overlay", true)
+        val showFrameRate = sharedPreferences.getBoolean("frame_rate", true)
+        val showBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
+
+        // Observe the LiveData for the frame rate and update the TextView accordingly
+        viewModel.frameRate.observe(this) {
+            val fpsText = getString(R.string.frames_per_second, String.format("%.2f", it))
+            fpsTextView.text = fpsText
+        }
+
+        // Observe the LiveData for the battery temperature and update the TextView accordingly
+        viewModel.batteryTemp.observe(this) {
+            tempTextView.text = getString(R.string.battery_temp, it)
+        }
+
         if (showFrameRate) {
             Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
                 override fun doFrame(frameTimeNanos: Long) {
@@ -73,9 +105,8 @@ class MainActivity : AppCompatActivity() {
                         frameCount = 0
                         lastFrameTime = currentTime
 
-                        // Display the frame rate
-                        val fpsText = getString(R.string.frames_per_second, String.format("%.2f", fps))
-                        fpsTextView.text = fpsText
+                        // Update the frame rate value in the ViewModel
+                        viewModel.updateFrameRate(fps.toFloat())
                     }
 
                     // Schedule the next frame
@@ -83,14 +114,8 @@ class MainActivity : AppCompatActivity() {
                     Choreographer.getInstance().postFrameCallback(this)
                 }
             })
-            fpsTextView.visibility = View.VISIBLE
-        } else {
-            fpsTextView.visibility = View.GONE
         }
 
-        tempTextView = findViewById(R.id.tempTextView)
-
-        // Show frame rate if preference is true
         if (showBatteryTemp) {
             // Create a Handler and a Runnable to update the temperature every second
             handler = Handler()
@@ -102,25 +127,16 @@ class MainActivity : AppCompatActivity() {
             }
             // Start the Runnable to update the temperature every second
             handler.postDelayed(runnable, 1000)
-            tempTextView.visibility = View.VISIBLE
-        } else {
-            tempTextView.visibility = View.GONE
         }
-
-
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        // Remove the Runnable when the Activity is destroyed to prevent memory leaks
-        handler.removeCallbacks(runnable)
     }
 
     private fun updateBatteryTemperature() {
-        // Get the battery temperature from the system
-        val batteryIntent = applicationContext.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-        val temperature = batteryIntent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
-        val temperatureInCelsius = temperature / 10f
-        tempTextView.text = getString(R.string.battery_temp, temperatureInCelsius)
+        lifecycleScope.launch {
+            // Get the battery temperature from the system
+            val batteryIntent = applicationContext.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+            val temperature = batteryIntent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
+            val temperatureInCelsius = temperature / 10f
+            viewModel.updateBatteryTemp(temperatureInCelsius)
+        }
     }
 }

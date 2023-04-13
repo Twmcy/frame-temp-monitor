@@ -1,33 +1,36 @@
 package com.nakkeez.frametempmonitor.service
 
-import android.app.Service
+import androidx.lifecycle.LifecycleService
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.PixelFormat
-import android.os.IBinder
-import android.util.Log
+import android.util.DisplayMetrics
 import android.view.*
 import android.widget.TextView
+import com.nakkeez.frametempmonitor.MainActivity
+import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
 
-class OverlayService : Service(), View.OnTouchListener {
+/**
+ * Service for displaying an overlay with frame rate and battery
+ * temperature. It's a LifecycleService instead of Service
+ * so the overlay can be ViewModelStoreOwner use LiveData.
+ */
+class OverlayService : LifecycleService(), View.OnTouchListener {
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: View
+
     private var initialX: Int = 0
     private var initialY: Int = 0
-    private var initialTouchX: Float = 0.toFloat()
-    private var initialTouchY: Float = 0.toFloat()
 
-    override fun onBind(intent: Intent?): IBinder? {
-        return null
-    }
+    // Instance of FrameTempViewModel
+    private lateinit var viewModel: FrameTempViewModel
 
     override fun onCreate() {
         super.onCreate()
 
         // Create a new view and set its layout parameters
         overlayView = TextView(this).apply {
-            text = "This is an overlay"
+            text = "Frame Rate: 0\nBattery Temp: 0" // Set initial text
             textSize = 24f
             setTextColor(Color.BLACK)
             setBackgroundColor(Color.LTGRAY)
@@ -42,22 +45,27 @@ class OverlayService : Service(), View.OnTouchListener {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         ).apply {
-            gravity = Gravity.TOP or Gravity.LEFT
+            gravity = Gravity.TOP or Gravity.START
         }
 
         // Get the window manager and add the view to the window
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowManager.addView(overlayView, params)
-
-        Log.d("OverlayService", "View added to window")
     }
 
     override fun onDestroy() {
         super.onDestroy()
 
-        // Remove the view from the window
-        windowManager.removeView(overlayView)
+        try {
+            // Remove the view from the window
+            windowManager.removeView(overlayView)
+
+            // Set isOverlayVisible to false
+            (applicationContext as MainActivity).isOverlayVisible = false
+        } catch (_: Exception) {}
     }
+
+
 
     override fun onTouch(view: View, event: MotionEvent): Boolean {
         when (event.action) {
@@ -78,6 +86,18 @@ class OverlayService : Service(), View.OnTouchListener {
 
                 // Reset the view's alpha to indicate that it is no longer being touched
                 view.alpha = 1.0f
+
+                // Get the screen height
+                val displayMetrics = DisplayMetrics()
+                windowManager.defaultDisplay.getMetrics(displayMetrics)
+                val screenHeight = displayMetrics.heightPixels
+
+                // Check if the view has moved out of the bottom of the screen
+                val layoutParams = view.layoutParams as WindowManager.LayoutParams
+                if (layoutParams.y + view.height > screenHeight) {
+                    // Remove the view from the window if it has moved out of the bottom of the screen
+                    windowManager.removeView(view)
+                }
                 return true
             }
             MotionEvent.ACTION_MOVE -> {
@@ -100,5 +120,4 @@ class OverlayService : Service(), View.OnTouchListener {
 
         return false
     }
-
 }

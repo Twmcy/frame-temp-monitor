@@ -3,6 +3,8 @@
     <!-- Main Activity -->
     <string name="frames_per_second">Frames per Second: %s</string>
     <string name="battery_temp">Battery temperature: %.1f\u00B0C</string>
+    <string name="overlay_off">Enable Overlay</string>
+    <string name="overlay_on">Disable Overlay</string>
 
     <!-- Settings Activity -->
     <string name="overlay_header">Overlay Settings</string>
