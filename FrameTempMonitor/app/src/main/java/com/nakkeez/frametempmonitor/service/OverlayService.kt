@@ -7,7 +7,6 @@ import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.IBinder
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.*
 import android.widget.TextView
 import com.nakkeez.frametempmonitor.MainActivity
