@@ -1,31 +1,41 @@
 package com.nakkeez.frametempmonitor.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.nakkeez.frametempmonitor.data.FrameTempRepository
 
 /**
  * ViewModel for used to observe the frame rate and battery temperature
  * values
  */
-class FrameTempViewModel : ViewModel() {
+class FrameTempViewModel(private val repository: FrameTempRepository) : ViewModel() {
 
-    private val _frameRate = MutableLiveData<Float>()
     val frameRate: LiveData<Float>
-        get() = _frameRate
+        get() = repository.frameRate
 
-    private val _batteryTemp = MutableLiveData<Float>()
     val batteryTemp: LiveData<Float>
-        get() = _batteryTemp
-
+        get() = repository.batteryTemp
 
     fun updateFrameRate(fps: Float) {
-        _frameRate.value = fps
+        repository.updateFrameRate(fps)
     }
 
     fun updateBatteryTemp(temp: Float) {
-        _batteryTemp.value = temp
+        repository.updateBatteryTemp(temp)
+    }
+
+    class FrameTempViewModelFactory(private val repository: FrameTempRepository) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(FrameTempViewModel::class.java)) {
+                @Suppress("UNCHECKED_CAST")
+                return FrameTempViewModel(repository) as T
+            }
+            throw IllegalArgumentException("Unknown ViewModel class")
+        }
     }
 }
+

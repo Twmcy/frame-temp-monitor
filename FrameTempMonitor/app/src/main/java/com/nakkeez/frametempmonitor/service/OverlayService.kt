@@ -2,13 +2,20 @@ package com.nakkeez.frametempmonitor.service
 
 import androidx.lifecycle.LifecycleService
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.graphics.PixelFormat
+import android.os.BatteryManager
+import android.os.Handler
 import android.util.DisplayMetrics
 import android.view.*
 import android.widget.TextView
+import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import com.nakkeez.frametempmonitor.MainActivity
-import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
+import com.nakkeez.frametempmonitor.data.FrameTempRepository
+import kotlinx.coroutines.launch
 
 /**
  * Service for displaying an overlay with frame rate and battery
@@ -19,21 +26,28 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: View
 
+    // Variables for getting battery temperature
+    private lateinit var handler: Handler
+    private lateinit var runnable: Runnable
+
     private var initialX: Int = 0
     private var initialY: Int = 0
 
-    // Instance of FrameTempViewModel
-    private lateinit var viewModel: FrameTempViewModel
+    // Variables to save frame rate
+    private var frameCount = 0
+    private var lastFrameTime: Long = 0
+
+    // Create an instance of FrameTempRepository
+    private val frameTempRepository = FrameTempRepository()
 
     override fun onCreate() {
         super.onCreate()
 
         // Create a new view and set its layout parameters
         overlayView = TextView(this).apply {
-            text = "Frame Rate: 0\nBattery Temp: 0" // Set initial text
-            textSize = 24f
+            text = "test" // Set initial text
+            textSize = 20f
             setTextColor(Color.BLACK)
-            setBackgroundColor(Color.LTGRAY)
             setBackgroundColor(Color.parseColor("#D9D3D3D3")) // (maybe E6 tai CC?) set a semi-transparent light grey color
             setOnTouchListener(this@OverlayService) // Set the touch listener
         }
@@ -51,6 +65,51 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         // Get the window manager and add the view to the window
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowManager.addView(overlayView, params)
+
+        Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
+            override fun doFrame(frameTimeNanos: Long) {
+                // Calculate the frame rate
+                val currentTime = System.nanoTime()
+                val elapsedNanos = currentTime - lastFrameTime
+                if (elapsedNanos > 1000000000) { // Update once per second
+                    val fps = frameCount * 1e9 / elapsedNanos
+                    frameCount = 0
+                    lastFrameTime = currentTime
+
+                    // Save the calculated frame rate to the repository
+                    frameTempRepository.updateFrameRate(fps.toFloat())
+                }
+
+                // Schedule the next frame
+                frameCount++
+                Choreographer.getInstance().postFrameCallback(this)
+            }
+        })
+
+        // Observe the frameRate and batteryTemp from repository and
+        // update the overlay to display them
+        val frameRateObserver = Observer<Float> { frameRate ->
+            val batteryTemp = frameTempRepository.batteryTemp.value ?: 0.0f
+            (overlayView as TextView).text = "Frame Rate: $frameRate fps\nBattery Temperature: $batteryTemp °C"
+        }
+        frameTempRepository.frameRate.observe(this, frameRateObserver)
+
+        val batteryTempObserver = Observer<Float> { batteryTemp ->
+            val frameRate = frameTempRepository.frameRate.value ?: 0.0f
+            (overlayView as TextView).text = "Frame Rate: $frameRate fps\nBattery Temperature: $batteryTemp °C"
+        }
+        frameTempRepository.batteryTemp.observe(this, batteryTempObserver)
+
+        // Create a Handler and a Runnable to update the temperature every second
+        handler = Handler()
+        runnable = object : Runnable {
+            override fun run() {
+                updateBatteryTemperature()
+                handler.postDelayed(this, 1000)
+            }
+        }
+        // Start the Runnable to update the temperature every second
+        handler.postDelayed(runnable, 1000)
     }
 
     override fun onDestroy() {
@@ -119,5 +178,16 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         }
 
         return false
+    }
+
+    private fun updateBatteryTemperature() {
+        lifecycleScope.launch {
+            // Get the battery temperature from the system
+            val batteryIntent = applicationContext.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+            val temperature = batteryIntent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
+            val temperatureInCelsius = temperature / 10f
+            // Save the calculated frame rate to the repository
+            frameTempRepository.updateBatteryTemp(temperatureInCelsius)
+        }
     }
 }

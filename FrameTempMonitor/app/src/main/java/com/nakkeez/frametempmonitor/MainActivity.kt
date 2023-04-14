@@ -15,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import com.nakkeez.frametempmonitor.preferences.SettingsActivity
 import com.nakkeez.frametempmonitor.service.OverlayService
 import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
@@ -40,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        viewModel = ViewModelProvider(this)[FrameTempViewModel::class.java]
+        viewModel = ViewModelProvider(this, FrameTempViewModel.FrameTempViewModelFactory(FrameTempRepository()))[FrameTempViewModel::class.java]
 
         // Set a button for navigating to SettingsActivity
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
@@ -79,7 +80,6 @@ class MainActivity : AppCompatActivity() {
 
         // Get the value of preferences
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val showOverlay = sharedPreferences.getBoolean("overlay", true)
         val showFrameRate = sharedPreferences.getBoolean("frame_rate", true)
         val showBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
 
@@ -128,8 +128,8 @@ class MainActivity : AppCompatActivity() {
             // Start the Runnable to update the temperature every second
             handler.postDelayed(runnable, 1000)
         }
-    }
 
+    }
     private fun updateBatteryTemperature() {
         lifecycleScope.launch {
             // Get the battery temperature from the system
