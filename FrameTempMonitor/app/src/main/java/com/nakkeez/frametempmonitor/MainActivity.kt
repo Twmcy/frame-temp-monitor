@@ -3,10 +3,8 @@ package com.nakkeez.frametempmonitor
 import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
-import android.os.BatteryManager
+import android.os.*
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.os.Handler
 import android.provider.Settings
 import android.view.Choreographer
 import android.widget.Button
@@ -19,6 +17,7 @@ import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import com.nakkeez.frametempmonitor.preferences.SettingsActivity
 import com.nakkeez.frametempmonitor.service.OverlayService
 import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
@@ -30,9 +29,13 @@ class MainActivity : AppCompatActivity() {
     // Variables for getting battery temperature
     private lateinit var handler: Handler
     private lateinit var runnable: Runnable
-    // Variables to save frame rate
+    private var batteryCheck: Job? = null
+
+    // Variables to use with frame rate calculations
     private var frameCount = 0
     private var lastFrameTime: Long = 0
+    private lateinit var fpsHandlerThread: HandlerThread
+    private lateinit var fpsHandler: Handler
 
     // Instance of FrameTempViewModel
     private lateinit var viewModel: FrameTempViewModel
@@ -70,7 +73,6 @@ class MainActivity : AppCompatActivity() {
 
         if (!Settings.canDrawOverlays(this)) {
             // Show alert dialog to the user saying a separate permission is needed
-            // Launch the settings activity if the user prefers
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                 Uri.parse("package:$packageName")
@@ -95,25 +97,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (showFrameRate) {
-            Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
-                override fun doFrame(frameTimeNanos: Long) {
-                    // Calculate the frame rate
-                    val currentTime = System.nanoTime()
-                    val elapsedNanos = currentTime - lastFrameTime
-                    if (elapsedNanos > 1000000000) { // Update once per second
-                        val fps = frameCount * 1e9 / elapsedNanos
-                        frameCount = 0
-                        lastFrameTime = currentTime
+            // Make a separate Thread for running the frame rate calculations
+            fpsHandlerThread = HandlerThread("FPSHandlerThread")
+            fpsHandlerThread.start()
 
-                        // Update the frame rate value in the ViewModel
-                        viewModel.updateFrameRate(fps.toFloat())
-                    }
+            fpsHandler = Handler(fpsHandlerThread.looper)
 
-                    // Schedule the next frame
-                    frameCount++
-                    Choreographer.getInstance().postFrameCallback(this)
-                }
-            })
+            startFpsCalculation()
         }
 
         if (showBatteryTemp) {
@@ -128,7 +118,45 @@ class MainActivity : AppCompatActivity() {
             // Start the Runnable to update the temperature every second
             handler.postDelayed(runnable, 1000)
         }
+    }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // Quit the Thread that calculates frame rates
+        fpsHandlerThread.quit()
+        // Remove any pending callbacks for the battery temperature Runnable
+        handler.removeCallbacks(runnable)
+        // Cancel the coroutine job of battery temperature
+        batteryCheck?.cancel()
+    }
+
+    private fun startFpsCalculation() {
+        fpsHandler.post {
+            Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
+                override fun doFrame(frameTimeNanos: Long) {
+                    // Calculate the frame rate
+                    val currentTime = System.nanoTime()
+                    val elapsedNanos = currentTime - lastFrameTime
+                    if (elapsedNanos > 1000000000) { // Update once per second
+                        val fps = frameCount * 1e9 / elapsedNanos
+                        frameCount = 0
+                        lastFrameTime = currentTime
+
+                        // Save the calculated frame rate to the repository using main thread
+                        val handler = Handler(Looper.getMainLooper())
+
+                        handler.post {
+                            viewModel.updateFrameRate(fps.toFloat())
+                        }
+                    }
+
+                    // Schedule the next frame
+                    frameCount++
+                    Choreographer.getInstance().postFrameCallback(this)
+                }
+            })
+        }
     }
     private fun updateBatteryTemperature() {
         lifecycleScope.launch {

@@ -6,9 +6,11 @@
     <string name="overlay_off">Enable Overlay</string>
     <string name="overlay_on">Disable Overlay</string>
 
+    <!-- OverlayService -->
+    <string name="loading">Loading…</string>
+
     <!-- Settings Activity -->
     <string name="overlay_header">Overlay Settings</string>
-    <string name="overlay_show">Show overlay</string>
     <string name="fps_show">Show frame rate</string>
     <string name="temp_show">Show battery temperature</string>
 

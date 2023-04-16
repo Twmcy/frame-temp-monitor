@@ -11,11 +11,14 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.*
 import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.preference.PreferenceManager
 import com.nakkeez.frametempmonitor.MainActivity
+import com.nakkeez.frametempmonitor.R
 import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -37,7 +40,7 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
     private var initialX: Int = 0
     private var initialY: Int = 0
 
-    // Variables to save frame rate
+    // Variables to use with frame rate calculations
     private var frameCount = 0
     private var lastFrameTime: Long = 0
 
@@ -50,9 +53,14 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
     override fun onCreate() {
         super.onCreate()
 
+        // Get the value of preferences
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val showFrameRate = sharedPreferences.getBoolean("frame_rate", true)
+        val showBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
+
         // Create a new view and set its layout parameters
         overlayView = TextView(this).apply {
-            text = "test" // Set initial text
+            text = getString(R.string.loading) // Set initial text
             textSize = 20f
             setTextColor(Color.BLACK)
             setBackgroundColor(Color.parseColor("#D9D3D3D3")) // (maybe E6 tai CC?) set a semi-transparent light grey color
@@ -73,26 +81,45 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowManager.addView(overlayView, params)
 
+        if (showFrameRate) {
+            // Observe the frameRate and update the overlay to display it
+            val frameRateObserver = Observer<Float> { frameRate ->
+                val batteryTemp = frameTempRepository.batteryTemp.value ?: 0.0f
+
+                val overlayText = if (showBatteryTemp) {
+                    "Frame Rate: $frameRate fps\nBattery Temperature: $batteryTemp °C"
+                } else {
+                    "Frame Rate: $frameRate fps"
+                }
+
+                (overlayView as TextView).text = overlayText
+            }
+            frameTempRepository.frameRate.observe(this, frameRateObserver)
+        }
+
+        if (showBatteryTemp) {
+            // Observe the battery temperature and update the overlay to display it
+            val batteryTempObserver = Observer<Float> { batteryTemp ->
+                val frameRate = frameTempRepository.frameRate.value ?: 0.0f
+
+                val overlayText = if (showFrameRate) {
+                    "Frame Rate: $frameRate fps\nBattery Temperature: $batteryTemp °C"
+                } else {
+                    "Frame Rate: $frameRate fps"
+                }
+
+                (overlayView as TextView).text = overlayText
+            }
+            frameTempRepository.batteryTemp.observe(this, batteryTempObserver)
+        }
+
+        // Make a separate Thread for running the frame rate calculations
         fpsHandlerThread = HandlerThread("FPSHandlerThread")
         fpsHandlerThread.start()
 
         fpsHandler = Handler(fpsHandlerThread.looper)
 
         startFpsCalculation()
-
-        // Observe the frameRate and batteryTemp from repository and
-        // update the overlay to display them
-        val frameRateObserver = Observer<Float> { frameRate ->
-            val batteryTemp = frameTempRepository.batteryTemp.value ?: 0.0f
-            (overlayView as TextView).text = "Frame Rate: $frameRate fps\nBattery Temperature: $batteryTemp °C"
-        }
-        frameTempRepository.frameRate.observe(this, frameRateObserver)
-
-        val batteryTempObserver = Observer<Float> { batteryTemp ->
-            val frameRate = frameTempRepository.frameRate.value ?: 0.0f
-            (overlayView as TextView).text = "Frame Rate: $frameRate fps\nBattery Temperature: $batteryTemp °C"
-        }
-        frameTempRepository.batteryTemp.observe(this, batteryTempObserver)
 
         // Create a Handler and a Runnable to update the temperature every second
         handler = Handler()
