@@ -96,25 +96,27 @@ class MainActivity : AppCompatActivity() {
             tempTextView.text = getString(R.string.battery_temp, it)
         }
 
+        // Make a separate Thread for running the frame rate calculations
+        fpsHandlerThread = HandlerThread("FPSHandlerThread")
+
+        fpsHandlerThread.start()
+
+        fpsHandler = Handler(fpsHandlerThread.looper)
+
         if (showFrameRate) {
-            // Make a separate Thread for running the frame rate calculations
-            fpsHandlerThread = HandlerThread("FPSHandlerThread")
-            fpsHandlerThread.start()
-
-            fpsHandler = Handler(fpsHandlerThread.looper)
-
             startFpsCalculation()
         }
 
-        if (showBatteryTemp) {
-            // Create a Handler and a Runnable to update the temperature every second
-            handler = Handler()
-            runnable = object : Runnable {
-                override fun run() {
-                    updateBatteryTemperature()
-                    handler.postDelayed(this, 1000)
-                }
+        // Create a Handler and a Runnable to update the temperature every second
+        handler = Handler()
+        runnable = object : Runnable {
+            override fun run() {
+                updateBatteryTemperature()
+                handler.postDelayed(this, 1000)
             }
+        }
+
+        if (showBatteryTemp) {
             // Start the Runnable to update the temperature every second
             handler.postDelayed(runnable, 1000)
         }

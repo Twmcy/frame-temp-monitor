@@ -2,8 +2,11 @@ package com.nakkeez.frametempmonitor.preferences
 
 import android.os.Bundle
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.SwitchPreferenceCompat
 import com.nakkeez.frametempmonitor.R
 
 /**
@@ -23,11 +26,31 @@ class SettingsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
-    class SettingsFragment : PreferenceFragmentCompat() {
+    class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeListener {
+
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
+
+            val frameRatePreference = findPreference<SwitchPreferenceCompat>("frame_rate")
+            frameRatePreference?.onPreferenceChangeListener = this
+
+            val batteryTemperaturePreference = findPreference<SwitchPreferenceCompat>("battery_temperature")
+            batteryTemperaturePreference?.onPreferenceChangeListener = this
+        }
+
+        override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
+            // Send a message to users telling about potential negative impacts these settings may cause
+            if ((preference.key == "frame_rate") && (newValue is Boolean) && newValue) {
+                Toast.makeText(context, "Calculating frame rate may negatively impact performance", Toast.LENGTH_SHORT).show()
+            }
+            if ((preference.key == "battery_temperature") && (newValue is Boolean) && newValue) {
+                Toast.makeText(context, "Tracking battery temperature may increase the battery drain", Toast.LENGTH_SHORT).show()
+            }
+
+            return true
         }
     }
+
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Return to MainActivity when Up button is pressed

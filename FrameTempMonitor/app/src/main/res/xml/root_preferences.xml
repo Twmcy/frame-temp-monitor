@@ -6,10 +6,6 @@
         app:key="overlay_category"
         app:title="@string/overlay_header">
 
-    <SwitchPreferenceCompat
-        app:key="overlay"
-        app:title="@string/overlay_show"/>
-
         <SwitchPreferenceCompat
             app:key="frame_rate"
             app:title="@string/fps_show" />

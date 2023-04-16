@@ -29,18 +29,18 @@ import kotlinx.coroutines.launch
  * so the overlay can be ViewModelStoreOwner use LiveData.
  */
 class OverlayService : LifecycleService(), View.OnTouchListener {
+    // Create variables for showing the overlay
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: View
+    private var initialX: Int = 0
+    private var initialY: Int = 0
 
-    // Variables for getting battery temperature
+    // Create variables for getting battery temperature
     private lateinit var handler: Handler
     private lateinit var runnable: Runnable
     private var batteryCheck: Job? = null
 
-    private var initialX: Int = 0
-    private var initialY: Int = 0
-
-    // Variables to use with frame rate calculations
+    // Create variables to use with frame rate calculations
     private var frameCount = 0
     private var lastFrameTime: Long = 0
 
@@ -105,7 +105,7 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
                 val overlayText = if (showFrameRate) {
                     "Frame Rate: $frameRate fps\nBattery Temperature: $batteryTemp °C"
                 } else {
-                    "Frame Rate: $frameRate fps"
+                    "Battery Temperature: $batteryTemp °C"
                 }
 
                 (overlayView as TextView).text = overlayText
@@ -115,11 +115,14 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
 
         // Make a separate Thread for running the frame rate calculations
         fpsHandlerThread = HandlerThread("FPSHandlerThread")
+
         fpsHandlerThread.start()
 
         fpsHandler = Handler(fpsHandlerThread.looper)
 
-        startFpsCalculation()
+        if (showFrameRate) {
+            startFpsCalculation()
+        }
 
         // Create a Handler and a Runnable to update the temperature every second
         handler = Handler()
@@ -130,7 +133,9 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
             }
         }
         // Start the Runnable to update the temperature every second
-        handler.postDelayed(runnable, 1000)
+        if (showBatteryTemp) {
+            handler.postDelayed(runnable, 1000)
+        }
     }
 
     override fun onDestroy() {
