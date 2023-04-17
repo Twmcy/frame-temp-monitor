@@ -9,6 +9,7 @@ import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
 
 class FrameRateHandler(private val frameTempRepository: FrameTempRepository) {
+
     private val fpsHandlerThread = HandlerThread("FPSHandlerThread")
 
     private lateinit var fpsHandler: Handler
@@ -32,11 +33,13 @@ class FrameRateHandler(private val frameTempRepository: FrameTempRepository) {
                         frameCount = 0
                         lastFrameTime = currentTime
 
+                        val fpsRounded = String.format("%.2f", fps)
+
                         // Save the calculated frame rate to the repository using main thread
                         val handler = Handler(Looper.getMainLooper())
 
                         handler.post {
-                            frameTempRepository.updateFrameRate(fps.toFloat())
+                            frameTempRepository.updateFrameRate(fpsRounded.toFloat())
                         }
                     }
 

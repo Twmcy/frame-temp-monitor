@@ -38,17 +38,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var frameRateHandler: FrameRateHandler
 
-    // Instance of FrameTempViewModel
-    private lateinit var viewModel: FrameTempViewModel
-
     // Create an instance of FrameTempRepository
     private val frameTempRepository = FrameTempRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-        viewModel = ViewModelProvider(this, FrameTempViewModel.FrameTempViewModelFactory(FrameTempRepository()))[FrameTempViewModel::class.java]
 
         // Set a button for navigating to SettingsActivity
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
@@ -94,7 +89,7 @@ class MainActivity : AppCompatActivity() {
         if (showFrameRate) {
             // Start observing the frame rate values inside repository
             frameTempRepository.frameRate.observe(this) {
-                val fpsText = getString(R.string.frames_per_second, String.format("%.2f", it))
+                val fpsText = getString(R.string.frames_per_second, it)
                 fpsTextView.text = fpsText
             }
             // start the frame rate calculations
