@@ -9,11 +9,14 @@ import android.provider.Settings
 import android.view.Choreographer
 import android.widget.Button
 import android.widget.TextView
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.nakkeez.frametempmonitor.data.BatteryTempUpdater
 import com.nakkeez.frametempmonitor.data.FrameTempRepository
+import com.nakkeez.frametempmonitor.model.FrameRateHandler
 import com.nakkeez.frametempmonitor.preferences.SettingsActivity
 import com.nakkeez.frametempmonitor.service.OverlayService
 import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
@@ -27,18 +30,19 @@ class MainActivity : AppCompatActivity() {
     var isOverlayVisible = false
 
     // Variables for getting battery temperature
-    private lateinit var handler: Handler
-    private lateinit var runnable: Runnable
-    private var batteryCheck: Job? = null
+    private lateinit var batteryTempUpdater: BatteryTempUpdater
 
     // Variables to use with frame rate calculations
     private var frameCount = 0
     private var lastFrameTime: Long = 0
-    private lateinit var fpsHandlerThread: HandlerThread
-    private lateinit var fpsHandler: Handler
+
+    private lateinit var frameRateHandler: FrameRateHandler
 
     // Instance of FrameTempViewModel
     private lateinit var viewModel: FrameTempViewModel
+
+    // Create an instance of FrameTempRepository
+    private val frameTempRepository = FrameTempRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,40 +89,27 @@ class MainActivity : AppCompatActivity() {
         val showFrameRate = sharedPreferences.getBoolean("frame_rate", true)
         val showBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
 
-        // Observe the LiveData for the frame rate and update the TextView accordingly
-        viewModel.frameRate.observe(this) {
-            val fpsText = getString(R.string.frames_per_second, String.format("%.2f", it))
-            fpsTextView.text = fpsText
-        }
-
-        // Observe the LiveData for the battery temperature and update the TextView accordingly
-        viewModel.batteryTemp.observe(this) {
-            tempTextView.text = getString(R.string.battery_temp, it)
-        }
-
-        // Make a separate Thread for running the frame rate calculations
-        fpsHandlerThread = HandlerThread("FPSHandlerThread")
-
-        fpsHandlerThread.start()
-
-        fpsHandler = Handler(fpsHandlerThread.looper)
+        frameRateHandler = FrameRateHandler(frameTempRepository)
 
         if (showFrameRate) {
-            startFpsCalculation()
+            // Start observing the frame rate values inside repository
+            frameTempRepository.frameRate.observe(this) {
+                val fpsText = getString(R.string.frames_per_second, String.format("%.2f", it))
+                fpsTextView.text = fpsText
+            }
+            // start the frame rate calculations
+            frameRateHandler.start()
         }
 
-        // Create a Handler and a Runnable to update the temperature every second
-        handler = Handler()
-        runnable = object : Runnable {
-            override fun run() {
-                updateBatteryTemperature()
-                handler.postDelayed(this, 1000)
-            }
-        }
+        batteryTempUpdater = BatteryTempUpdater(this, frameTempRepository)
 
         if (showBatteryTemp) {
-            // Start the Runnable to update the temperature every second
-            handler.postDelayed(runnable, 1000)
+            // Start observing battery temperature values inside repository
+            frameTempRepository.batteryTemp.observe(this) {
+                tempTextView.text = getString(R.string.battery_temp, it)
+            }
+            // Start tracking battery temperature
+            batteryTempUpdater.startUpdating()
         }
     }
 
@@ -126,47 +117,9 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
 
         // Quit the Thread that calculates frame rates
-        fpsHandlerThread.quit()
+        frameRateHandler.stop()
+
         // Remove any pending callbacks for the battery temperature Runnable
-        handler.removeCallbacks(runnable)
-        // Cancel the coroutine job of battery temperature
-        batteryCheck?.cancel()
-    }
-
-    private fun startFpsCalculation() {
-        fpsHandler.post {
-            Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
-                override fun doFrame(frameTimeNanos: Long) {
-                    // Calculate the frame rate
-                    val currentTime = System.nanoTime()
-                    val elapsedNanos = currentTime - lastFrameTime
-                    if (elapsedNanos > 1000000000) { // Update once per second
-                        val fps = frameCount * 1e9 / elapsedNanos
-                        frameCount = 0
-                        lastFrameTime = currentTime
-
-                        // Save the calculated frame rate to the repository using main thread
-                        val handler = Handler(Looper.getMainLooper())
-
-                        handler.post {
-                            viewModel.updateFrameRate(fps.toFloat())
-                        }
-                    }
-
-                    // Schedule the next frame
-                    frameCount++
-                    Choreographer.getInstance().postFrameCallback(this)
-                }
-            })
-        }
-    }
-    private fun updateBatteryTemperature() {
-        lifecycleScope.launch {
-            // Get the battery temperature from the system
-            val batteryIntent = applicationContext.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-            val temperature = batteryIntent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
-            val temperatureInCelsius = temperature / 10f
-            viewModel.updateBatteryTemp(temperatureInCelsius)
-        }
+        batteryTempUpdater.stopUpdating()
     }
 }

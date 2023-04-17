@@ -19,14 +19,15 @@ import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.nakkeez.frametempmonitor.MainActivity
 import com.nakkeez.frametempmonitor.R
+import com.nakkeez.frametempmonitor.data.BatteryTempUpdater
 import com.nakkeez.frametempmonitor.data.FrameTempRepository
+import com.nakkeez.frametempmonitor.model.FrameRateHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /**
- * Service for displaying an overlay with frame rate and battery
- * temperature. It's a LifecycleService instead of Service
- * so the overlay can be ViewModelStoreOwner use LiveData.
+ * Service for displaying an overlay on the foreground with frame rate and
+ * battery temperature.
  */
 class OverlayService : LifecycleService(), View.OnTouchListener {
     // Create variables for showing the overlay
@@ -36,16 +37,10 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
     private var initialY: Int = 0
 
     // Create variables for getting battery temperature
-    private lateinit var handler: Handler
-    private lateinit var runnable: Runnable
-    private var batteryCheck: Job? = null
+    private lateinit var batteryTempUpdater: BatteryTempUpdater
 
     // Create variables to use with frame rate calculations
-    private var frameCount = 0
-    private var lastFrameTime: Long = 0
-
-    private lateinit var fpsHandlerThread: HandlerThread
-    private lateinit var fpsHandler: Handler
+    private lateinit var frameRateHandler: FrameRateHandler
 
     // Create an instance of FrameTempRepository
     private val frameTempRepository = FrameTempRepository()
@@ -87,9 +82,9 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
                 val batteryTemp = frameTempRepository.batteryTemp.value ?: 0.0f
 
                 val overlayText = if (showBatteryTemp) {
-                    "Frame Rate: $frameRate fps\nBattery Temperature: $batteryTemp °C"
+                    "$frameRate fps\n$batteryTemp °C"
                 } else {
-                    "Frame Rate: $frameRate fps"
+                    "$frameRate fps"
                 }
 
                 (overlayView as TextView).text = overlayText
@@ -103,9 +98,9 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
                 val frameRate = frameTempRepository.frameRate.value ?: 0.0f
 
                 val overlayText = if (showFrameRate) {
-                    "Frame Rate: $frameRate fps\nBattery Temperature: $batteryTemp °C"
+                    "$frameRate fps\n$batteryTemp °C"
                 } else {
-                    "Battery Temperature: $batteryTemp °C"
+                    "$batteryTemp °C"
                 }
 
                 (overlayView as TextView).text = overlayText
@@ -114,27 +109,18 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         }
 
         // Make a separate Thread for running the frame rate calculations
-        fpsHandlerThread = HandlerThread("FPSHandlerThread")
-
-        fpsHandlerThread.start()
-
-        fpsHandler = Handler(fpsHandlerThread.looper)
+        frameRateHandler = FrameRateHandler(frameTempRepository)
 
         if (showFrameRate) {
-            startFpsCalculation()
+            // start the frame rate calculations
+            frameRateHandler.start()
         }
 
-        // Create a Handler and a Runnable to update the temperature every second
-        handler = Handler()
-        runnable = object : Runnable {
-            override fun run() {
-                updateBatteryTemperature()
-                handler.postDelayed(this, 1000)
-            }
-        }
-        // Start the Runnable to update the temperature every second
+        batteryTempUpdater = BatteryTempUpdater(this, frameTempRepository)
+
         if (showBatteryTemp) {
-            handler.postDelayed(runnable, 1000)
+            // Start tracking battery temperature
+            batteryTempUpdater.startUpdating()
         }
     }
 
@@ -150,11 +136,9 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         } catch (_: Exception) {}
 
         // Quit the Thread that calculates frame rates
-        fpsHandlerThread.quit()
+        frameRateHandler.stop()
         // Remove any pending callbacks for the battery temperature Runnable
-        handler.removeCallbacks(runnable)
-        // Cancel the coroutine job of battery temperature
-        batteryCheck?.cancel()
+        batteryTempUpdater.stopUpdating()
     }
 
     override fun onTouch(view: View, event: MotionEvent): Boolean {
@@ -209,46 +193,5 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         }
 
         return false
-    }
-
-    private fun startFpsCalculation() {
-        fpsHandler.post {
-            Choreographer.getInstance().postFrameCallback(object : Choreographer.FrameCallback {
-                override fun doFrame(frameTimeNanos: Long) {
-                    // Calculate the frame rate
-                    val currentTime = System.nanoTime()
-                    val elapsedNanos = currentTime - lastFrameTime
-                    if (elapsedNanos > 1000000000) { // Update once per second
-                        val fps = frameCount * 1e9 / elapsedNanos
-                        frameCount = 0
-                        lastFrameTime = currentTime
-
-                        // Save the calculated frame rate to the repository using main thread
-                        val handler = Handler(Looper.getMainLooper())
-
-                        handler.post {
-                            frameTempRepository.updateFrameRate(fps.toFloat())
-                        }
-                    }
-
-                    // Schedule the next frame
-                    frameCount++
-                    Choreographer.getInstance().postFrameCallback(this)
-                }
-            })
-        }
-    }
-
-    private fun updateBatteryTemperature() {
-        batteryCheck?.cancel() // Cancel any existing job
-
-        batteryCheck = lifecycleScope.launch {
-            // Get the battery temperature from the system
-            val batteryIntent = applicationContext.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-            val temperature = batteryIntent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
-            val temperatureInCelsius = temperature / 10f
-            // Save the calculated frame rate to the repository
-            frameTempRepository.updateBatteryTemp(temperatureInCelsius)
-        }
     }
 }
