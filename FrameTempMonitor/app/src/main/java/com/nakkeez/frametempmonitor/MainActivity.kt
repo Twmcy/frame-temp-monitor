@@ -93,7 +93,7 @@ class MainActivity : AppCompatActivity() {
                 fpsTextView.text = fpsText
             }
             // start the frame rate calculations
-            frameRateHandler.start()
+            frameRateHandler.startCalculatingFrameRate()
         }
 
         batteryTempUpdater = BatteryTempUpdater(this, frameTempRepository)
@@ -104,7 +104,7 @@ class MainActivity : AppCompatActivity() {
                 tempTextView.text = getString(R.string.battery_temp, it)
             }
             // Start tracking battery temperature
-            batteryTempUpdater.startUpdating()
+            batteryTempUpdater.startUpdatingBatteryTemperature()
         }
     }
 
@@ -112,9 +112,9 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
 
         // Quit the Thread that calculates frame rates
-        frameRateHandler.stop()
+        frameRateHandler.stopCalculatingFrameRate()
 
         // Remove any pending callbacks for the battery temperature Runnable
-        batteryTempUpdater.stopUpdating()
+        batteryTempUpdater.stopUpdatingBatteryTemperature()
     }
 }

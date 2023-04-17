@@ -113,14 +113,14 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
 
         if (showFrameRate) {
             // start the frame rate calculations
-            frameRateHandler.start()
+            frameRateHandler.startCalculatingFrameRate()
         }
 
         batteryTempUpdater = BatteryTempUpdater(this, frameTempRepository)
 
         if (showBatteryTemp) {
             // Start tracking battery temperature
-            batteryTempUpdater.startUpdating()
+            batteryTempUpdater.startUpdatingBatteryTemperature()
         }
     }
 
@@ -136,9 +136,9 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         } catch (_: Exception) {}
 
         // Quit the Thread that calculates frame rates
-        frameRateHandler.stop()
+        frameRateHandler.stopCalculatingFrameRate()
         // Remove any pending callbacks for the battery temperature Runnable
-        batteryTempUpdater.stopUpdating()
+        batteryTempUpdater.stopUpdatingBatteryTemperature()
     }
 
     override fun onTouch(view: View, event: MotionEvent): Boolean {

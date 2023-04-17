@@ -17,7 +17,7 @@ class FrameRateHandler(private val frameTempRepository: FrameTempRepository) {
     private var frameCount = 0
     private var lastFrameTime = System.nanoTime()
 
-    fun start() {
+    fun startCalculatingFrameRate() {
         fpsHandlerThread.start()
 
         fpsHandler = Handler(fpsHandlerThread.looper)
@@ -51,7 +51,7 @@ class FrameRateHandler(private val frameTempRepository: FrameTempRepository) {
         }
     }
 
-    fun stop() {
+    fun stopCalculatingFrameRate() {
         fpsHandlerThread.quitSafely()
     }
 }

@@ -13,7 +13,7 @@ class BatteryTempUpdater(private val context: Context, private val frameTempRepo
     private lateinit var runnable: Runnable
     private var batteryCheck: Job? = null
 
-    fun startUpdating() {
+    fun startUpdatingBatteryTemperature() {
         // Create a Handler and a Runnable to get battery temperature
         handler = Handler()
         runnable = object : Runnable {
@@ -26,7 +26,7 @@ class BatteryTempUpdater(private val context: Context, private val frameTempRepo
         handler.postDelayed(runnable, 1000)
     }
 
-    fun stopUpdating() {
+    fun stopUpdatingBatteryTemperature() {
         handler.removeCallbacks(runnable)
     }
 
