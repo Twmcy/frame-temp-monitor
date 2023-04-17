@@ -171,6 +171,8 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
                 if (layoutParams.y + view.height > screenHeight) {
                     // Remove the view from the window if it has moved out of the bottom of the screen
                     windowManager.removeView(view)
+                    // Stop the Service after the overlay has been removed
+                    stopSelf()
                 }
                 return true
             }
