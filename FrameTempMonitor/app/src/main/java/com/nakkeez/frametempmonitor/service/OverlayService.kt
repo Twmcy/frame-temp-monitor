@@ -2,28 +2,18 @@ package com.nakkeez.frametempmonitor.service
 
 import androidx.lifecycle.LifecycleService
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.Color
 import android.graphics.PixelFormat
-import android.os.BatteryManager
-import android.os.Handler
-import android.os.HandlerThread
-import android.os.Looper
 import android.util.DisplayMetrics
-import android.util.Log
 import android.view.*
 import android.widget.TextView
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.nakkeez.frametempmonitor.MainActivity
 import com.nakkeez.frametempmonitor.R
-import com.nakkeez.frametempmonitor.data.BatteryTempUpdater
+import com.nakkeez.frametempmonitor.model.BatteryTempUpdater
 import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import com.nakkeez.frametempmonitor.model.FrameRateHandler
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 
 /**
  * Service for displaying an overlay on the foreground with frame rate and

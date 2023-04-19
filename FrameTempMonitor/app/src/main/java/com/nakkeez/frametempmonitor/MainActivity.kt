@@ -1,27 +1,19 @@
 package com.nakkeez.frametempmonitor
 
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.Uri
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
 import android.provider.Settings
-import android.view.Choreographer
 import android.widget.Button
 import android.widget.TextView
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.nakkeez.frametempmonitor.data.BatteryTempUpdater
+import com.nakkeez.frametempmonitor.model.BatteryTempUpdater
 import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import com.nakkeez.frametempmonitor.model.FrameRateHandler
 import com.nakkeez.frametempmonitor.preferences.SettingsActivity
 import com.nakkeez.frametempmonitor.service.OverlayService
-import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 
 /**
  * Main activity that calculates the frame rate and battery temperature.
