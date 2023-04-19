@@ -1,19 +1,16 @@
 package com.nakkeez.frametempmonitor.data
 
 import androidx.lifecycle.LiveData
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 
 @Dao
 interface FrameTempDao {
-    @Insert
-    suspend fun insertFrameTemp(frameTemp: FrameTemp)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(frameTempData: FrameTempData)
 
     @Delete
-    suspend fun deleteFrameTemp(frameTemp: FrameTemp)
+    fun delete(frameTempData: FrameTempData)
 
-    @Query("SELECT * FROM performance")
-    fun getFrameTemps(): LiveData<List<FrameTemp>>
+    @Query("SELECT * FROM frame_temp_data")
+    fun getAll(): List<FrameTempData>
 }

@@ -5,6 +5,8 @@
     <string name="battery_temp">Battery temperature: %.1f\u00B0C</string>
     <string name="overlay_off">Enable Overlay</string>
     <string name="overlay_on">Disable Overlay</string>
+    <string name="saving_off">Save Data</string>
+    <string name="saving_on">Stop Saving Data</string>
 
     <!-- OverlayService -->
     <string name="loading">Loading…</string>

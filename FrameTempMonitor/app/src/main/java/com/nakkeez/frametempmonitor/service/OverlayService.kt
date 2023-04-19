@@ -9,8 +9,10 @@ import android.view.*
 import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
+import androidx.room.Room
 import com.nakkeez.frametempmonitor.MainActivity
 import com.nakkeez.frametempmonitor.R
+import com.nakkeez.frametempmonitor.data.FrameTempDatabase
 import com.nakkeez.frametempmonitor.model.BatteryTempUpdater
 import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import com.nakkeez.frametempmonitor.model.FrameRateHandler
@@ -20,6 +22,7 @@ import com.nakkeez.frametempmonitor.model.FrameRateHandler
  * battery temperature.
  */
 class OverlayService : LifecycleService(), View.OnTouchListener {
+
     // Create variables for showing the overlay
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: View
@@ -33,10 +36,14 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
     private lateinit var frameRateHandler: FrameRateHandler
 
     // Create an instance of FrameTempRepository
-    private val frameTempRepository = FrameTempRepository()
+    private lateinit var frameTempDatabase: FrameTempDatabase
+    private lateinit var frameTempRepository: FrameTempRepository
 
     override fun onCreate() {
         super.onCreate()
+
+        frameTempDatabase = FrameTempDatabase.getInstance(applicationContext)
+        frameTempRepository = FrameTempRepository(frameTempDatabase)
 
         // Get the value of preferences
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)

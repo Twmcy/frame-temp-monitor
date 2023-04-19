@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.nakkeez.frametempmonitor.data.FrameTempDatabase
 import com.nakkeez.frametempmonitor.model.BatteryTempUpdater
 import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import com.nakkeez.frametempmonitor.model.FrameRateHandler
@@ -30,12 +31,16 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var frameRateHandler: FrameRateHandler
 
-    // Create an instance of FrameTempRepository
-    private val frameTempRepository = FrameTempRepository()
+    // Create an instance of Database and Repository Pattern
+    private lateinit var frameTempDatabase: FrameTempDatabase
+    private lateinit var frameTempRepository: FrameTempRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        frameTempDatabase = FrameTempDatabase.getInstance(applicationContext)
+        frameTempRepository = FrameTempRepository(frameTempDatabase)
 
         // Set a button for navigating to SettingsActivity
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
@@ -43,9 +48,6 @@ class MainActivity : AppCompatActivity() {
             val settingsIntent = Intent(this, SettingsActivity::class.java)
             startActivity(settingsIntent)
         }
-
-        val fpsTextView = findViewById<TextView>(R.id.fpsTextView)
-        val tempTextView = findViewById<TextView>(R.id.tempTextView)
 
         val overlayButton = findViewById<Button>(R.id.overlayButton)
         overlayButton.setOnClickListener {
@@ -62,6 +64,17 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val storeDataButton = findViewById<Button>(R.id.storeDataButton)
+        storeDataButton.setOnClickListener {
+            if (storeDataButton.text == getString(R.string.saving_off)) {
+                frameTempRepository.startStoringData()
+                storeDataButton.text = getString(R.string.saving_on)
+            } else {
+                frameTempRepository.stopStoringData()
+                storeDataButton.text = getString(R.string.saving_off)
+            }
+        }
+
         if (!Settings.canDrawOverlays(this)) {
             // Show alert dialog to the user saying a separate permission is needed
             val intent = Intent(
@@ -75,6 +88,9 @@ class MainActivity : AppCompatActivity() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val showFrameRate = sharedPreferences.getBoolean("frame_rate", true)
         val showBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
+
+        val fpsTextView = findViewById<TextView>(R.id.fpsTextView)
+        val tempTextView = findViewById<TextView>(R.id.tempTextView)
 
         frameRateHandler = FrameRateHandler(frameTempRepository)
 
