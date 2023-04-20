@@ -38,15 +38,6 @@ class FrameTempRepository(private val frameTempDatabase: FrameTempDatabase) {
 
     fun updateBatteryTemp(temp: Float) {
         _batteryTemp.value = temp
-
-        if (isStoring) {
-            dataBuffer.add(
-                FrameTempData(
-                    frameRate = _frameRate.value ?: 0f,
-                    batteryTemp = temp
-                )
-            )
-        }
     }
 
     fun startStoringData() {

@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.provider.Settings
 import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nakkeez.frametempmonitor.data.FrameTempDatabase
@@ -21,6 +22,7 @@ import com.nakkeez.frametempmonitor.service.OverlayService
  */
 class MainActivity : AppCompatActivity() {
     var isOverlayVisible = false
+    private var isStoring = false
 
     // Variables for getting battery temperature
     private lateinit var batteryTempUpdater: BatteryTempUpdater
@@ -49,6 +51,12 @@ class MainActivity : AppCompatActivity() {
             startActivity(settingsIntent)
         }
 
+        val dataActivityButton = findViewById<Button>(R.id.dataActivityButton)
+        dataActivityButton.setOnClickListener {
+            val dataIntent = Intent(this, FrameTempDataActivity::class.java)
+            startActivity(dataIntent)
+        }
+
         val overlayButton = findViewById<Button>(R.id.overlayButton)
         overlayButton.setOnClickListener {
             isOverlayVisible = if (isOverlayVisible) {
@@ -66,12 +74,24 @@ class MainActivity : AppCompatActivity() {
 
         val storeDataButton = findViewById<Button>(R.id.storeDataButton)
         storeDataButton.setOnClickListener {
-            if (storeDataButton.text == getString(R.string.saving_off)) {
-                frameTempRepository.startStoringData()
-                storeDataButton.text = getString(R.string.saving_on)
+            if (!isStoring) {
+                try {
+                    frameTempRepository.startStoringData()
+                    storeDataButton.text = getString(R.string.saving_on)
+                    Toast.makeText(this, "Started saving the performance data", Toast.LENGTH_LONG).show()
+                    isStoring = true
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Could not start saving performance data", Toast.LENGTH_LONG).show()
+                }
             } else {
-                frameTempRepository.stopStoringData()
-                storeDataButton.text = getString(R.string.saving_off)
+                try {
+                    frameTempRepository.stopStoringData()
+                    storeDataButton.text = getString(R.string.saving_off)
+                    Toast.makeText(this, "Stopped saving the performance data", Toast.LENGTH_LONG).show()
+                    isStoring  = false
+                } catch (e: Exception) {
+                    Toast.makeText(this, "Could not stop saving performance data", Toast.LENGTH_LONG).show()
+                }
             }
         }
 
