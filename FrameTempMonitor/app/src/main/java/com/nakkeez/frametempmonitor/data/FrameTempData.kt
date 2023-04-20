@@ -1,30 +1,20 @@
 package com.nakkeez.frametempmonitor.data
 
 import androidx.room.*
-import java.time.OffsetDateTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.ZonedDateTime
 
+/**
+ * The FrameTempData class represents a data model for storing frame rate
+ * and battery temperature data to Room database.
+ * The data is stored in a table named "frame_temp_data".
+ */
 @Entity(tableName = "frame_temp_data")
 data class FrameTempData(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val frameRate: Float,
     val batteryTemp: Float,
+    // Timestamp for when the data was captured. Depends on the user's time zone
     val timestamp: ZonedDateTime = ZonedDateTime.now(ZoneId.systemDefault())
 )
-
-class ZonedDateTimeConverter {
-    @TypeConverter
-    fun fromTimestamp(value: Long?): ZonedDateTime? {
-        return value?.let {
-            ZonedDateTime.ofInstant(java.time.Instant.ofEpochMilli(value), java.time.ZoneId.systemDefault())
-        }
-    }
-
-    @TypeConverter
-    fun toTimestamp(value: ZonedDateTime?): Long? {
-        return value?.toInstant()?.toEpochMilli()
-    }
-}
