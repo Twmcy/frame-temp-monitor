@@ -6,6 +6,8 @@ import android.graphics.Color
 import android.graphics.PixelFormat
 import android.util.DisplayMetrics
 import android.view.*
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
@@ -17,7 +19,7 @@ import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import com.nakkeez.frametempmonitor.model.FrameRateHandler
 
 /**
- * Service for displaying an overlay on the foreground with frame rate and
+ * LifecycleService for displaying an overlay on the foreground with frame rate and
  * battery temperature.
  */
 class OverlayService : LifecycleService(), View.OnTouchListener {
@@ -50,13 +52,26 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         frameTempRepository = FrameTempRepository(frameTempDatabase, showFrameRate, showBatteryTemp)
 
         // Create a new view and set its layout parameters
-        overlayView = TextView(this).apply {
-            text = getString(R.string.loading) // Set initial text
-            textSize = 20f
-            setTextColor(Color.BLACK)
+        overlayView = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
             setBackgroundColor(Color.parseColor("#D9D3D3D3")) // (maybe E6 tai CC?) set a semi-transparent light grey color
             setOnTouchListener(this@OverlayService) // Set the touch listener
         }
+
+        val dataTextView = TextView(this).apply {
+            text = getString(R.string.loading) // Set initial text
+            textSize = 20f
+            setTextColor(Color.BLACK)
+        }
+        (overlayView as LinearLayout).addView(dataTextView)
+
+        val button = Button(this).apply {
+            text = "Click me"
+            setOnClickListener {
+                // Handle button click here
+            }
+        }
+        (overlayView as LinearLayout).addView(button)
 
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -83,7 +98,7 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
                     "$frameRate fps"
                 }
 
-                (overlayView as TextView).text = overlayText
+                dataTextView.text = overlayText
             }
             frameTempRepository.frameRate.observe(this, frameRateObserver)
         }
@@ -99,7 +114,7 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
                     "$batteryTemp °C"
                 }
 
-                (overlayView as TextView).text = overlayText
+                dataTextView.text = overlayText
             }
             frameTempRepository.batteryTemp.observe(this, batteryTempObserver)
         }
