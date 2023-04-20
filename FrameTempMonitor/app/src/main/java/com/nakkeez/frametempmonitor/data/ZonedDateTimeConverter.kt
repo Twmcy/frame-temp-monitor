@@ -6,7 +6,8 @@ import java.time.ZonedDateTime
 /**
  * The ZonedDateTimeConverter class is a type converter that converts
  * a ZonedDateTime object to a Long timestamp value for storing in the
- * database, and other way around
+ * database, and other way around.
+ * This is needed because Room database does not support ZonedDateTime format.
  */
 class ZonedDateTimeConverter {
     // Converts a Long timestamp value to a ZonedDateTime object.
