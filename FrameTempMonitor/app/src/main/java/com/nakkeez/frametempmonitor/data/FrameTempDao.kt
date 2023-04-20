@@ -2,6 +2,9 @@ package com.nakkeez.frametempmonitor.data
 
 import androidx.room.*
 
+/**
+ * Defines a Data Access Object for the FrameTempData data class
+ */
 @Dao
 interface FrameTempDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -9,9 +12,6 @@ interface FrameTempDao {
 
     @Query("SELECT * FROM frame_temp_data")
     fun getAll(): List<FrameTempData>
-
-    @Delete
-    fun delete(frameTempData: FrameTempData)
 
     @Query("DELETE FROM frame_temp_data")
     fun deleteAll()

@@ -5,9 +5,8 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 /**
- * The FrameTempData class represents a data model for storing frame rate
- * and battery temperature data to Room database.
- * The data is stored in a table named "frame_temp_data".
+ * Represents a data model for storing frame rate and battery temperature
+ * data to Room database. The data is stored in a table named "frame_temp_data".
  */
 @Entity(tableName = "frame_temp_data")
 data class FrameTempData(
