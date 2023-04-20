@@ -12,8 +12,6 @@ data class FrameTempData(
     val id: Long = 0,
     val frameRate: Float,
     val batteryTemp: Float,
-    // val timestamp: Long = System.currentTimeMillis()
-    // val timestamp: ZonedDateTime = ZonedDateTime.now(ZoneId.systemDefault())
     val timestamp: ZonedDateTime = ZonedDateTime.now(ZoneId.systemDefault())
 )
 
