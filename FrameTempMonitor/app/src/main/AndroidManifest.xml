@@ -16,6 +16,9 @@
         <service android:name=".service.OverlayService"
             android:exported="true" />
         <activity
+            android:name=".FrameTempDataActivity"
+            android:exported="false"/>
+        <activity
             android:name=".preferences.SettingsActivity"
             android:exported="false"/>
         <activity

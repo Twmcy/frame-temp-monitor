@@ -28,7 +28,10 @@ class BatteryTempUpdater(private val context: Context, private val frameTempRepo
     }
 
     fun stopUpdatingBatteryTemperature() {
-        handler.removeCallbacks(runnable)
+        // Remove any pending callbacks for the battery temperature Runnable if it was started
+        if(::handler.isInitialized && ::runnable.isInitialized) {
+            handler.removeCallbacks(runnable)
+        }
     }
 
     private fun updateBatteryTemperature() {

@@ -1,33 +1,28 @@
 package com.nakkeez.frametempmonitor
 
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.Uri
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
 import android.provider.Settings
-import android.view.Choreographer
 import android.widget.Button
 import android.widget.TextView
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
+import android.widget.Toast
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.nakkeez.frametempmonitor.data.BatteryTempUpdater
+import com.nakkeez.frametempmonitor.data.FrameTempDatabase
+import com.nakkeez.frametempmonitor.model.BatteryTempUpdater
 import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import com.nakkeez.frametempmonitor.model.FrameRateHandler
 import com.nakkeez.frametempmonitor.preferences.SettingsActivity
 import com.nakkeez.frametempmonitor.service.OverlayService
-import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 
 /**
  * Main activity that calculates the frame rate and battery temperature.
  */
 class MainActivity : AppCompatActivity() {
     var isOverlayVisible = false
+    private var isStoring = false
 
     // Variables for getting battery temperature
     private lateinit var batteryTempUpdater: BatteryTempUpdater
@@ -38,12 +33,21 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var frameRateHandler: FrameRateHandler
 
-    // Create an instance of FrameTempRepository
-    private val frameTempRepository = FrameTempRepository()
+    // Create an instance of Database and Repository Pattern
+    private lateinit var frameTempDatabase: FrameTempDatabase
+    private lateinit var frameTempRepository: FrameTempRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Get the values for user's preferences
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val showFrameRate = sharedPreferences.getBoolean("frame_rate", true)
+        val showBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
+
+        frameTempDatabase = FrameTempDatabase.getInstance(applicationContext)
+        frameTempRepository = FrameTempRepository(frameTempDatabase, showFrameRate, showBatteryTemp)
 
         // Set a button for navigating to SettingsActivity
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
@@ -52,8 +56,11 @@ class MainActivity : AppCompatActivity() {
             startActivity(settingsIntent)
         }
 
-        val fpsTextView = findViewById<TextView>(R.id.fpsTextView)
-        val tempTextView = findViewById<TextView>(R.id.tempTextView)
+        val dataActivityButton = findViewById<Button>(R.id.dataActivityButton)
+        dataActivityButton.setOnClickListener {
+            val dataIntent = Intent(this, FrameTempDataActivity::class.java)
+            startActivity(dataIntent)
+        }
 
         val overlayButton = findViewById<Button>(R.id.overlayButton)
         overlayButton.setOnClickListener {
@@ -70,6 +77,33 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val storeDataButton = findViewById<Button>(R.id.storeDataButton)
+        storeDataButton.setOnClickListener {
+            if (!showFrameRate && !showBatteryTemp) {
+                Toast.makeText(this, "Enable frame rate or temperature tracking from settings to save data", Toast.LENGTH_LONG).show()
+            } else {
+                if (!isStoring) {
+                    try {
+                        frameTempRepository.startStoringData()
+                        storeDataButton.text = getString(R.string.saving_on)
+                        Toast.makeText(this, "Started saving the performance data", Toast.LENGTH_LONG).show()
+                        isStoring = true
+                    } catch (e: Exception) {
+                        Toast.makeText(this, "Could not start saving performance data", Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    try {
+                        frameTempRepository.stopStoringData()
+                        storeDataButton.text = getString(R.string.saving_off)
+                        Toast.makeText(this, "Stopped saving the performance data", Toast.LENGTH_LONG).show()
+                        isStoring  = false
+                    } catch (e: Exception) {
+                        Toast.makeText(this, "Could not stop saving performance data", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }
+        }
+
         if (!Settings.canDrawOverlays(this)) {
             // Show alert dialog to the user saying a separate permission is needed
             val intent = Intent(
@@ -79,10 +113,8 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Get the value of preferences
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val showFrameRate = sharedPreferences.getBoolean("frame_rate", true)
-        val showBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
+        val fpsTextView = findViewById<TextView>(R.id.fpsTextView)
+        val tempTextView = findViewById<TextView>(R.id.tempTextView)
 
         frameRateHandler = FrameRateHandler(frameTempRepository)
 

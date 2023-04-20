@@ -1,5 +1,6 @@
 package com.nakkeez.frametempmonitor.preferences
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Toast
@@ -7,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
+import com.nakkeez.frametempmonitor.MainActivity
 import com.nakkeez.frametempmonitor.R
 
 /**
@@ -51,11 +53,15 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         // Return to MainActivity when Up button is pressed
         when (item.itemId) {
             android.R.id.home -> {
+                val intent = Intent(this, MainActivity::class.java)
+                // Clear existing instance of MainActivity from the activity stack
+                // and create a new instance so preferences will take effect
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
                 finish()
                 return true
             }
