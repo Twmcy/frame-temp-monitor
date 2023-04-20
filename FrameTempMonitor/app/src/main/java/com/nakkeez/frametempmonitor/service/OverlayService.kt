@@ -9,6 +9,7 @@ import android.view.*
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
 import com.nakkeez.frametempmonitor.MainActivity
@@ -29,6 +30,11 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
     private lateinit var overlayView: View
     private var initialX: Int = 0
     private var initialY: Int = 0
+
+    private lateinit var saveDataButton: Button
+
+    // Variable to track is Service is storing data
+    private var isStoring = false
 
     // Create variables for getting battery temperature
     private lateinit var batteryTempUpdater: BatteryTempUpdater
@@ -65,13 +71,13 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         }
         (overlayView as LinearLayout).addView(dataTextView)
 
-        val button = Button(this).apply {
-            text = "Click me"
+        saveDataButton = Button(this).apply {
+            text = getString(R.string.saving_off)
             setOnClickListener {
-                // Handle button click here
+                saveData(showFrameRate, showBatteryTemp)
             }
         }
-        (overlayView as LinearLayout).addView(button)
+        (overlayView as LinearLayout).addView(saveDataButton)
 
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -144,7 +150,8 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
 
             // Set isOverlayVisible to false
             (applicationContext as MainActivity).isOverlayVisible = false
-        } catch (_: Exception) {}
+        } catch (_: Exception) {
+        }
 
         // Quit the Thread that calculates frame rates
         frameRateHandler.stopCalculatingFrameRate()
@@ -207,4 +214,45 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
 
         return false
     }
+
+    private fun saveData(showFrameRate: Boolean, showBatteryTemp: Boolean) {
+        if (!showFrameRate && !showBatteryTemp) {
+            Toast.makeText(
+                this,
+                "Enable frame rate or temperature tracking from settings to save data",
+                Toast.LENGTH_LONG
+            ).show()
+        } else {
+            if (!isStoring) {
+                try {
+                    frameTempRepository.startStoringData()
+                    saveDataButton.text = getString(R.string.saving_on)
+                    Toast.makeText(this, "Started saving the performance data", Toast.LENGTH_LONG)
+                        .show()
+                    isStoring = true
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        this,
+                        "Could not start saving performance data",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            } else {
+                try {
+                    frameTempRepository.stopStoringData()
+                    saveDataButton.text = getString(R.string.saving_off)
+                    Toast.makeText(this, "Stopped saving the performance data", Toast.LENGTH_LONG)
+                        .show()
+                    isStoring = false
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        this,
+                        "Could not stop saving performance data",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+    }
 }
+
