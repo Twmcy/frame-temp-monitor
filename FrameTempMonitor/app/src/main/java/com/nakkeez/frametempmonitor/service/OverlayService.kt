@@ -51,11 +51,12 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
 
         // Get the value of preferences
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val showFrameRate = sharedPreferences.getBoolean("frame_rate", true)
-        val showBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
+        val preferenceFrameRate = sharedPreferences.getBoolean("frame_rate", true)
+        val preferenceBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
+        val preferenceFontSize = sharedPreferences.getString("font_size", "Medium")
 
         frameTempDatabase = FrameTempDatabase.getInstance(applicationContext)
-        frameTempRepository = FrameTempRepository(frameTempDatabase, showFrameRate, showBatteryTemp)
+        frameTempRepository = FrameTempRepository(frameTempDatabase, preferenceFrameRate, preferenceBatteryTemp)
 
         // Create a new view and set its layout parameters
         overlayView = LinearLayout(this).apply {
@@ -68,7 +69,17 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
 
         val dataTextView = TextView(this).apply {
             text = getString(R.string.loading) // Set initial text
-            textSize = 16f
+            textSize = when (preferenceFontSize) {
+                "Small" -> {
+                    16f
+                }
+                "Big" -> {
+                    20f
+                }
+                else -> {
+                    18f
+                }
+            }
             setTextColor(Color.BLACK)
         }
 
@@ -78,7 +89,7 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
             text = getString(R.string.saving_off)
 
             setOnClickListener {
-                saveData(showFrameRate, showBatteryTemp)
+                saveData(preferenceFrameRate, preferenceBatteryTemp)
             }
 
             layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
@@ -102,12 +113,12 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
         windowManager.addView(overlayView, params)
 
-        if (showFrameRate) {
+        if (preferenceFrameRate) {
             // Observe the frameRate and update the overlay to display it
             val frameRateObserver = Observer<Float> { frameRate ->
                 val batteryTemp = frameTempRepository.batteryTemp.value ?: 0.0f
 
-                val overlayText = if (showBatteryTemp) {
+                val overlayText = if (preferenceBatteryTemp) {
                     "$frameRate fps\n$batteryTemp °C"
                 } else {
                     "$frameRate fps"
@@ -118,12 +129,12 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
             frameTempRepository.frameRate.observe(this, frameRateObserver)
         }
 
-        if (showBatteryTemp) {
+        if (preferenceBatteryTemp) {
             // Observe the battery temperature and update the overlay to display it
             val batteryTempObserver = Observer<Float> { batteryTemp ->
                 val frameRate = frameTempRepository.frameRate.value ?: 0.0f
 
-                val overlayText = if (showFrameRate) {
+                val overlayText = if (preferenceFrameRate) {
                     "$frameRate fps\n$batteryTemp °C"
                 } else {
                     "$batteryTemp °C"
@@ -137,14 +148,14 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         // Make a separate Thread for running the frame rate calculations
         frameRateHandler = FrameRateHandler(frameTempRepository)
 
-        if (showFrameRate) {
+        if (preferenceFrameRate) {
             // start the frame rate calculations
             frameRateHandler.startCalculatingFrameRate()
         }
 
         batteryTempUpdater = BatteryTempUpdater(this, frameTempRepository)
 
-        if (showBatteryTemp) {
+        if (preferenceBatteryTemp) {
             // Start tracking battery temperature
             batteryTempUpdater.startUpdatingBatteryTemperature()
         }
@@ -224,8 +235,8 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         return false
     }
 
-    private fun saveData(showFrameRate: Boolean, showBatteryTemp: Boolean) {
-        if (!showFrameRate && !showBatteryTemp) {
+    private fun saveData(preferenceFrameRate: Boolean, preferenceBatteryTemp: Boolean) {
+        if (!preferenceFrameRate && !preferenceBatteryTemp) {
             Toast.makeText(
                 this,
                 "Enable frame rate or temperature tracking from settings to save data",
