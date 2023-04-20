@@ -20,7 +20,9 @@ import com.nakkeez.frametempmonitor.service.OverlayService
 import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
 
 /**
- * Main activity that calculates the frame rate and battery temperature.
+ * MainActivity that calculates the frame rate and battery temperature and
+ * displays them in a TextViews. User can start the OverlayService and navigate
+ * to the SettingsActivity or FrameTempDataActivity.
  */
 class MainActivity : AppCompatActivity() {
     var isOverlayVisible = false
@@ -80,33 +82,6 @@ class MainActivity : AppCompatActivity() {
                 startService(intent)
                 overlayButton.text = getString(R.string.overlay_on)
                 true
-            }
-        }
-
-        val storeDataButton = findViewById<Button>(R.id.storeDataButton)
-        storeDataButton.setOnClickListener {
-            if (!showFrameRate && !showBatteryTemp) {
-                Toast.makeText(this, "Enable frame rate or temperature tracking from settings to save data", Toast.LENGTH_LONG).show()
-            } else {
-                if (!isStoring) {
-                    try {
-                        frameTempRepository.startStoringData()
-                        storeDataButton.text = getString(R.string.saving_on)
-                        Toast.makeText(this, "Started saving the performance data", Toast.LENGTH_LONG).show()
-                        isStoring = true
-                    } catch (e: Exception) {
-                        Toast.makeText(this, "Could not start saving performance data", Toast.LENGTH_LONG).show()
-                    }
-                } else {
-                    try {
-                        frameTempRepository.stopStoringData()
-                        storeDataButton.text = getString(R.string.saving_off)
-                        Toast.makeText(this, "Stopped saving the performance data", Toast.LENGTH_LONG).show()
-                        isStoring  = false
-                    } catch (e: Exception) {
-                        Toast.makeText(this, "Could not stop saving performance data", Toast.LENGTH_LONG).show()
-                    }
-                }
             }
         }
 

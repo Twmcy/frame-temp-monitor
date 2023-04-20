@@ -7,7 +7,8 @@
     <string name="overlay_on">Disable Overlay</string>
     <string name="saving_off">Save Data</string>
     <string name="saving_on">Stop Saving</string>
-    <string name="nav_data_activity">See Stored Data</string>
+    <string name="nav_data_activity">See Saved Data</string>
+    <string name="fab_settings">Open settings menu</string>
 
     <!-- OverlayService -->
     <string name="loading">Loading…</string>
@@ -16,11 +17,13 @@
     <string name="data_fps">FPS: %.2f — </string>
     <string name="data_temp">TEMP: %.1f\u00B0C</string>
     <string name="data_time">TIME: %s</string>
+    <string name="fab_delete">Delete saved data</string>
 
     <!-- Settings Activity -->
     <string name="overlay_header">Overlay Settings</string>
     <string name="fps_show">Track frame rate</string>
     <string name="temp_show">Track battery temperature</string>
+    <string name="button_show">Show Save button</string>
     <string name="font_show">Overlay font size</string>
 
     <string name="help_header">Help</string>
