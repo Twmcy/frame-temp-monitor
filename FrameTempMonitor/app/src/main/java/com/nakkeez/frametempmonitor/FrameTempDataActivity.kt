@@ -1,6 +1,5 @@
 package com.nakkeez.frametempmonitor
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +14,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * Activity where saved frame rate and battery temperature values can be
+ * viewed and deleted by the user.
+ */
 class FrameTempDataActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView

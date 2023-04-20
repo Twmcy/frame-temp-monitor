@@ -21,7 +21,7 @@ import com.nakkeez.frametempmonitor.model.FrameRateHandler
 
 /**
  * LifecycleService for displaying an overlay on the foreground with frame rate and
- * battery temperature.
+ * battery temperature data. Has a button for storing captured performance data
  */
 class OverlayService : LifecycleService(), View.OnTouchListener {
 
@@ -57,7 +57,8 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         val preferenceFontSize = sharedPreferences.getString("font_size", "Medium")
 
         frameTempDatabase = FrameTempDatabase.getInstance(applicationContext)
-        frameTempRepository = FrameTempRepository(frameTempDatabase, preferenceFrameRate, preferenceBatteryTemp)
+        frameTempRepository =
+            FrameTempRepository(frameTempDatabase, preferenceFrameRate, preferenceBatteryTemp)
 
         // Create a new view and set its layout parameters
         overlayView = LinearLayout(this).apply {
@@ -65,7 +66,7 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
             setBackgroundColor(Color.parseColor("#D9D3D3D3")) // (maybe E6 tai CC?) set a semi-transparent light grey color
             setOnTouchListener(this@OverlayService) // Set the touch listener
 
-            setPadding(10, 10, 10,10 )
+            setPadding(10, 10, 10, 10)
         }
 
         val dataTextView = TextView(this).apply {
@@ -93,7 +94,10 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
                 saveData(preferenceFrameRate, preferenceBatteryTemp)
             }
 
-            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
                 setMargins(0, 0, 0, 0) // Set margins to 0
                 setPadding(15, 0, 15, 0) // Set padding to 0
             }

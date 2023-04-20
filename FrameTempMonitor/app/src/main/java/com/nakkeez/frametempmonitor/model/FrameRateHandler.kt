@@ -8,7 +8,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
 
-class FrameRateHandler(private val frameTempRepository: FrameTempRepository?, private val frameTempViewModel: FrameTempViewModel?) {
+/**
+ * Calculates the frame rate the system is running on
+ */
+class FrameRateHandler(
+    private val frameTempRepository: FrameTempRepository?,
+    private val frameTempViewModel: FrameTempViewModel?
+) {
 
     private val fpsHandlerThread = HandlerThread("FPSHandlerThread")
 

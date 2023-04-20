@@ -36,17 +36,26 @@ class SettingsActivity : AppCompatActivity() {
             val frameRatePreference = findPreference<SwitchPreferenceCompat>("frame_rate")
             frameRatePreference?.onPreferenceChangeListener = this
 
-            val batteryTemperaturePreference = findPreference<SwitchPreferenceCompat>("battery_temperature")
+            val batteryTemperaturePreference =
+                findPreference<SwitchPreferenceCompat>("battery_temperature")
             batteryTemperaturePreference?.onPreferenceChangeListener = this
         }
 
         override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
             // Send a message to users telling about potential negative impacts these settings may cause
             if ((preference.key == "frame_rate") && (newValue is Boolean) && newValue) {
-                Toast.makeText(context, "Calculating frame rate may negatively impact performance", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Calculating frame rate may negatively impact performance",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
             if ((preference.key == "battery_temperature") && (newValue is Boolean) && newValue) {
-                Toast.makeText(context, "Tracking battery temperature may increase the battery drain", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    "Tracking battery temperature may increase the battery drain",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
 
             return true

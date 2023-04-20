@@ -10,7 +10,14 @@ import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
 import kotlinx.coroutines.*
 import java.lang.Runnable
 
-class BatteryTempUpdater(private val context: Context, private val frameTempRepository: FrameTempRepository?, private val frameTempViewModel: FrameTempViewModel?) {
+/**
+ * Tracks the battery temperature from the system
+ */
+class BatteryTempUpdater(
+    private val context: Context,
+    private val frameTempRepository: FrameTempRepository?,
+    private val frameTempViewModel: FrameTempViewModel?
+) {
     private lateinit var handler: Handler
     private lateinit var runnable: Runnable
     private var batteryCheck: Job? = null
@@ -30,7 +37,7 @@ class BatteryTempUpdater(private val context: Context, private val frameTempRepo
 
     fun stopUpdatingBatteryTemperature() {
         // Remove any pending callbacks for the battery temperature Runnable if it was started
-        if(::handler.isInitialized && ::runnable.isInitialized) {
+        if (::handler.isInitialized && ::runnable.isInitialized) {
             handler.removeCallbacks(runnable)
         }
     }
@@ -39,8 +46,11 @@ class BatteryTempUpdater(private val context: Context, private val frameTempRepo
         batteryCheck?.cancel() // Cancel any existing job
         // Get the battery temperature from the system
         batteryCheck = CoroutineScope(Dispatchers.IO).launch {
-            val batteryIntent = context.applicationContext.registerReceiver(null, IntentFilter(
-                Intent.ACTION_BATTERY_CHANGED))
+            val batteryIntent = context.applicationContext.registerReceiver(
+                null, IntentFilter(
+                    Intent.ACTION_BATTERY_CHANGED
+                )
+            )
             val temperature = batteryIntent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
             val temperatureInCelsius = temperature / 10f
             // Save the calculated frame rate to the repository using main thread

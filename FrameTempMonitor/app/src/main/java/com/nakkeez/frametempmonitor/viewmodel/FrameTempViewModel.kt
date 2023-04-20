@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.nakkeez.frametempmonitor.data.FrameTempRepository
 
 /**
- * ViewModel for used to observe the frame rate and battery temperature
- * values
+ * ViewModel used to store and observe the frame rate and battery temperature
+ * values from UI.
  */
 class FrameTempViewModel(private val repository: FrameTempRepository) : ViewModel() {
 
@@ -25,7 +25,8 @@ class FrameTempViewModel(private val repository: FrameTempRepository) : ViewMode
         repository.updateBatteryTemp(temp)
     }
 
-    class FrameTempViewModelFactory(private val repository: FrameTempRepository) : ViewModelProvider.Factory {
+    class FrameTempViewModelFactory(private val repository: FrameTempRepository) :
+        ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(FrameTempViewModel::class.java)) {
                 @Suppress("UNCHECKED_CAST")
