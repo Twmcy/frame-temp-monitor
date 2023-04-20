@@ -14,7 +14,7 @@
 
     <!-- FrameTempDataActivity -->
     <string name="data_fps">FPS: %.2f — </string>
-    <string name="data_temp">TEMP: %.1f\u00B0C — </string>
+    <string name="data_temp">TEMP: %.1f\u00B0C</string>
     <string name="data_time">TIME: %s</string>
 
     <!-- Settings Activity -->

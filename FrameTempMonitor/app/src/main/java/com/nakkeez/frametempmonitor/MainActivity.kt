@@ -8,6 +8,7 @@ import android.provider.Settings
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
 import androidx.preference.PreferenceManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nakkeez.frametempmonitor.data.FrameTempDatabase
@@ -16,6 +17,7 @@ import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import com.nakkeez.frametempmonitor.model.FrameRateHandler
 import com.nakkeez.frametempmonitor.preferences.SettingsActivity
 import com.nakkeez.frametempmonitor.service.OverlayService
+import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
 
 /**
  * Main activity that calculates the frame rate and battery temperature.
@@ -36,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     // Create an instance of Database and Repository Pattern
     private lateinit var frameTempDatabase: FrameTempDatabase
     private lateinit var frameTempRepository: FrameTempRepository
+    private lateinit var frameTempViewModel: FrameTempViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +51,9 @@ class MainActivity : AppCompatActivity() {
 
         frameTempDatabase = FrameTempDatabase.getInstance(applicationContext)
         frameTempRepository = FrameTempRepository(frameTempDatabase, showFrameRate, showBatteryTemp)
+
+        // Initialize the FrameTempViewModel using the ViewModelProvider
+        frameTempViewModel = ViewModelProvider(this, FrameTempViewModel.FrameTempViewModelFactory(frameTempRepository))[FrameTempViewModel::class.java]
 
         // Set a button for navigating to SettingsActivity
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
@@ -116,24 +122,25 @@ class MainActivity : AppCompatActivity() {
         val fpsTextView = findViewById<TextView>(R.id.fpsTextView)
         val tempTextView = findViewById<TextView>(R.id.tempTextView)
 
-        frameRateHandler = FrameRateHandler(frameTempRepository)
+        frameRateHandler = FrameRateHandler(frameTempRepository, null)
 
         if (showFrameRate) {
-            // Start observing the frame rate values inside repository
-            frameTempRepository.frameRate.observe(this) {
-                val fpsText = getString(R.string.frames_per_second, it)
+            // Start observing the frame rate values from ViewModel
+            frameTempViewModel.frameRate.observe(this) { frameRate ->
+                val fpsText = getString(R.string.frames_per_second, frameRate)
                 fpsTextView.text = fpsText
             }
             // start the frame rate calculations
             frameRateHandler.startCalculatingFrameRate()
         }
 
-        batteryTempUpdater = BatteryTempUpdater(this, frameTempRepository)
+        batteryTempUpdater = BatteryTempUpdater(this, frameTempRepository, null)
 
         if (showBatteryTemp) {
-            // Start observing battery temperature values inside repository
-            frameTempRepository.batteryTemp.observe(this) {
-                tempTextView.text = getString(R.string.battery_temp, it)
+            // Start observing battery temperature values from ViewModel
+            frameTempViewModel.batteryTemp.observe(this) { batteryTemp ->
+                val tempText =  getString(R.string.battery_temp, batteryTemp)
+                tempTextView.text = tempText
             }
             // Start tracking battery temperature
             batteryTempUpdater.startUpdatingBatteryTemperature()

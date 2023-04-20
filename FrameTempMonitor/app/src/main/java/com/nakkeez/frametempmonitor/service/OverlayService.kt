@@ -146,14 +146,14 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         }
 
         // Make a separate Thread for running the frame rate calculations
-        frameRateHandler = FrameRateHandler(frameTempRepository)
+        frameRateHandler = FrameRateHandler(frameTempRepository, null)
 
         if (preferenceFrameRate) {
             // start the frame rate calculations
             frameRateHandler.startCalculatingFrameRate()
         }
 
-        batteryTempUpdater = BatteryTempUpdater(this, frameTempRepository)
+        batteryTempUpdater = BatteryTempUpdater(this, frameTempRepository, null)
 
         if (preferenceBatteryTemp) {
             // Start tracking battery temperature

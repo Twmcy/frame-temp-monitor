@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
 
-class FrameRateHandler(private val frameTempRepository: FrameTempRepository) {
+class FrameRateHandler(private val frameTempRepository: FrameTempRepository?, private val frameTempViewModel: FrameTempViewModel?) {
 
     private val fpsHandlerThread = HandlerThread("FPSHandlerThread")
 
@@ -35,11 +35,17 @@ class FrameRateHandler(private val frameTempRepository: FrameTempRepository) {
 
                         val fpsRounded = String.format("%.2f", fps)
 
+                        // Replace commas with dots, because finnish phones etc. use commas
+                        val fpsReplaced = fpsRounded.replace(",", ".")
+
                         // Save the calculated frame rate to the repository using main thread
                         val handler = Handler(Looper.getMainLooper())
 
                         handler.post {
-                            frameTempRepository.updateFrameRate(fpsRounded.toFloat())
+                            // update LiveData from ViewModel/Repository depending if the calculations
+                            // are made from OverlayService or MainActivity
+                            frameTempViewModel?.updateFrameRate(fpsReplaced.toFloat())
+                            frameTempRepository?.updateFrameRate(fpsReplaced.toFloat())
                         }
                     }
 
