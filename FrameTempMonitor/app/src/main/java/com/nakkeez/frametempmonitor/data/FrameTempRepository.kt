@@ -6,8 +6,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
-class FrameTempRepository(private val frameTempDatabase: FrameTempDatabase, private val showFrameRate: Boolean, private val showBatteryTemp: Boolean) {
+class FrameTempRepository(private val frameTempDatabase: FrameTempDatabase, private val preferenceFrameRate: Boolean, private val preferenceBatteryTemp: Boolean) {
 
     private val _frameRate = MutableLiveData<Float>()
     val frameRate: LiveData<Float>
@@ -25,7 +27,7 @@ class FrameTempRepository(private val frameTempDatabase: FrameTempDatabase, priv
     fun updateFrameRate(fps: Float) {
         _frameRate.value = fps
 
-        if (isStoring && showFrameRate) {
+        if (isStoring && preferenceFrameRate) {
             dataBuffer.add(
                 FrameTempData(
                     frameRate = fps,
@@ -38,7 +40,7 @@ class FrameTempRepository(private val frameTempDatabase: FrameTempDatabase, priv
     fun updateBatteryTemp(temp: Float) {
         _batteryTemp.value = temp
 
-        if ((isStoring && showBatteryTemp && !showFrameRate)) {
+        if ((isStoring && preferenceBatteryTemp && !preferenceFrameRate)) {
             dataBuffer.add(
                 FrameTempData(
                     frameRate = _frameRate.value ?: 0f,

@@ -14,6 +14,14 @@
             app:key="battery_temperature"
             app:title="@string/temp_show" />
 
+        <ListPreference
+            app:key="font_size"
+            app:title="@string/font_show"
+            app:defaultValue="Medium"
+            app:entries="@array/font_entries"
+            app:entryValues="@array/font_values"
+            app:useSimpleSummaryProvider="true" />
+
     </PreferenceCategory>
 
     <PreferenceCategory
