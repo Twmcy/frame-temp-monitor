@@ -53,6 +53,7 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val preferenceFrameRate = sharedPreferences.getBoolean("frame_rate", true)
         val preferenceBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
+        val preferenceSaveButton = sharedPreferences.getBoolean("save_button", true)
         val preferenceFontSize = sharedPreferences.getString("font_size", "Medium")
 
         frameTempDatabase = FrameTempDatabase.getInstance(applicationContext)
@@ -97,7 +98,9 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
                 setPadding(15, 0, 15, 0) // Set padding to 0
             }
         }
-        (overlayView as LinearLayout).addView(saveDataButton)
+        if (preferenceSaveButton) {
+            (overlayView as LinearLayout).addView(saveDataButton)
+        }
 
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,

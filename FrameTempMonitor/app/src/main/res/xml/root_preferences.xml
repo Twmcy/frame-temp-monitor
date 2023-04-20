@@ -8,11 +8,18 @@
 
         <SwitchPreferenceCompat
             app:key="frame_rate"
-            app:title="@string/fps_show" />
+            app:title="@string/fps_show"
+            app:defaultValue="true"/>
 
         <SwitchPreferenceCompat
             app:key="battery_temperature"
-            app:title="@string/temp_show" />
+            app:title="@string/temp_show"
+            app:defaultValue="true"/>
+
+        <SwitchPreferenceCompat
+            app:key="save_button"
+            app:title="@string/button_show"
+            app:defaultValue="true"/>
 
         <ListPreference
             app:key="font_size"
