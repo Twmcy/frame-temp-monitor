@@ -1,16 +1,14 @@
 package com.nakkeez.frametempmonitor.data
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.nakkeez.frametempmonitor.FrameTempApplication
-import com.nakkeez.frametempmonitor.service.OverlayService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class FrameTempRepository(private val frameTempDatabase: FrameTempDatabase) {
+class FrameTempRepository(private val frameTempDatabase: FrameTempDatabase, private val showFrameRate: Boolean, private val showBatteryTemp: Boolean) {
+
     private val _frameRate = MutableLiveData<Float>()
     val frameRate: LiveData<Float>
         get() = _frameRate
@@ -19,6 +17,7 @@ class FrameTempRepository(private val frameTempDatabase: FrameTempDatabase) {
     val batteryTemp: LiveData<Float>
         get() = _batteryTemp
 
+
     private var isStoring = false
     private var storageJob: Job? = null
     private val dataBuffer = mutableListOf<FrameTempData>()
@@ -26,7 +25,7 @@ class FrameTempRepository(private val frameTempDatabase: FrameTempDatabase) {
     fun updateFrameRate(fps: Float) {
         _frameRate.value = fps
 
-        if (isStoring) {
+        if (isStoring && showFrameRate) {
             dataBuffer.add(
                 FrameTempData(
                     frameRate = fps,
@@ -38,6 +37,15 @@ class FrameTempRepository(private val frameTempDatabase: FrameTempDatabase) {
 
     fun updateBatteryTemp(temp: Float) {
         _batteryTemp.value = temp
+
+        if ((isStoring && showBatteryTemp && !showFrameRate)) {
+            dataBuffer.add(
+                FrameTempData(
+                    frameRate = _frameRate.value ?: 0f,
+                    batteryTemp = temp
+                )
+            )
+        }
     }
 
     fun startStoringData() {

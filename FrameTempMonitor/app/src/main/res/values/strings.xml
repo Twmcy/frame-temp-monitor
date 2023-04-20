@@ -19,8 +19,8 @@
 
     <!-- Settings Activity -->
     <string name="overlay_header">Overlay Settings</string>
-    <string name="fps_show">Show frame rate</string>
-    <string name="temp_show">Show battery temperature</string>
+    <string name="fps_show">Track frame rate</string>
+    <string name="temp_show">Track battery temperature</string>
 
     <string name="help_header">Help</string>
     <string name="feedback_send">Send feedback</string>

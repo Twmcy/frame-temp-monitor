@@ -41,8 +41,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // Get the values for user's preferences
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val showFrameRate = sharedPreferences.getBoolean("frame_rate", true)
+        val showBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
+
         frameTempDatabase = FrameTempDatabase.getInstance(applicationContext)
-        frameTempRepository = FrameTempRepository(frameTempDatabase)
+        frameTempRepository = FrameTempRepository(frameTempDatabase, showFrameRate, showBatteryTemp)
 
         // Set a button for navigating to SettingsActivity
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
@@ -74,23 +79,27 @@ class MainActivity : AppCompatActivity() {
 
         val storeDataButton = findViewById<Button>(R.id.storeDataButton)
         storeDataButton.setOnClickListener {
-            if (!isStoring) {
-                try {
-                    frameTempRepository.startStoringData()
-                    storeDataButton.text = getString(R.string.saving_on)
-                    Toast.makeText(this, "Started saving the performance data", Toast.LENGTH_LONG).show()
-                    isStoring = true
-                } catch (e: Exception) {
-                    Toast.makeText(this, "Could not start saving performance data", Toast.LENGTH_LONG).show()
-                }
+            if (!showFrameRate && !showBatteryTemp) {
+                Toast.makeText(this, "Enable frame rate or temperature tracking from settings to save data", Toast.LENGTH_LONG).show()
             } else {
-                try {
-                    frameTempRepository.stopStoringData()
-                    storeDataButton.text = getString(R.string.saving_off)
-                    Toast.makeText(this, "Stopped saving the performance data", Toast.LENGTH_LONG).show()
-                    isStoring  = false
-                } catch (e: Exception) {
-                    Toast.makeText(this, "Could not stop saving performance data", Toast.LENGTH_LONG).show()
+                if (!isStoring) {
+                    try {
+                        frameTempRepository.startStoringData()
+                        storeDataButton.text = getString(R.string.saving_on)
+                        Toast.makeText(this, "Started saving the performance data", Toast.LENGTH_LONG).show()
+                        isStoring = true
+                    } catch (e: Exception) {
+                        Toast.makeText(this, "Could not start saving performance data", Toast.LENGTH_LONG).show()
+                    }
+                } else {
+                    try {
+                        frameTempRepository.stopStoringData()
+                        storeDataButton.text = getString(R.string.saving_off)
+                        Toast.makeText(this, "Stopped saving the performance data", Toast.LENGTH_LONG).show()
+                        isStoring  = false
+                    } catch (e: Exception) {
+                        Toast.makeText(this, "Could not stop saving performance data", Toast.LENGTH_LONG).show()
+                    }
                 }
             }
         }
@@ -103,11 +112,6 @@ class MainActivity : AppCompatActivity() {
             )
             startActivity(intent)
         }
-
-        // Get the value of preferences
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val showFrameRate = sharedPreferences.getBoolean("frame_rate", true)
-        val showBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
 
         val fpsTextView = findViewById<TextView>(R.id.fpsTextView)
         val tempTextView = findViewById<TextView>(R.id.tempTextView)

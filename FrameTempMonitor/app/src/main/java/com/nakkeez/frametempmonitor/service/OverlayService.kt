@@ -9,7 +9,6 @@ import android.view.*
 import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.preference.PreferenceManager
-import androidx.room.Room
 import com.nakkeez.frametempmonitor.MainActivity
 import com.nakkeez.frametempmonitor.R
 import com.nakkeez.frametempmonitor.data.FrameTempDatabase
@@ -42,13 +41,13 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
     override fun onCreate() {
         super.onCreate()
 
-        frameTempDatabase = FrameTempDatabase.getInstance(applicationContext)
-        frameTempRepository = FrameTempRepository(frameTempDatabase)
-
         // Get the value of preferences
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
         val showFrameRate = sharedPreferences.getBoolean("frame_rate", true)
         val showBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
+
+        frameTempDatabase = FrameTempDatabase.getInstance(applicationContext)
+        frameTempRepository = FrameTempRepository(frameTempDatabase, showFrameRate, showBatteryTemp)
 
         // Create a new view and set its layout parameters
         overlayView = TextView(this).apply {

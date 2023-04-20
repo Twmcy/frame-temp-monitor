@@ -1,6 +1,8 @@
 package com.nakkeez.frametempmonitor
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,6 +24,8 @@ class FrameTempDataActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_frame_temp_data)
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         recyclerView = findViewById(R.id.recyclerview)
 
@@ -53,6 +57,17 @@ class FrameTempDataActivity : AppCompatActivity() {
             recyclerView.adapter = adapter
             LinearLayoutManager(this@FrameTempDataActivity).also { recyclerView.layoutManager = it }
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Return to MainActivity when Up button is pressed
+        when (item.itemId) {
+            android.R.id.home -> {
+                finish()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 }
 
