@@ -20,6 +20,9 @@ class FrameRateHandler(
 
     private lateinit var fpsHandler: Handler
 
+    // Create a handler for updating UI elements on the main thread
+    private val uiHandler = Handler(Looper.getMainLooper())
+
     private var frameCount = 0
     private var lastFrameTime = System.nanoTime()
 
@@ -45,9 +48,7 @@ class FrameRateHandler(
                         val fpsReplaced = fpsRounded.replace(",", ".")
 
                         // Save the calculated frame rate to the repository using main thread
-                        val handler = Handler(Looper.getMainLooper())
-
-                        handler.post {
+                        uiHandler.post {
                             // update LiveData from ViewModel/Repository depending if the calculations
                             // are made from OverlayService or MainActivity
                             frameTempViewModel?.updateFrameRate(fpsReplaced.toFloat())
