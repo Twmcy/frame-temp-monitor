@@ -3,6 +3,7 @@
     <!-- Main Activity -->
     <string name="frames_per_second">Frames per Second: %.1f</string>
     <string name="battery_temp">Battery temperature: %.1f\u00B0C</string>
+    <string name="cpu_temp">CPU temperature: %.1f\u00B0C</string>
     <string name="overlay_off">Enable Overlay</string>
     <string name="overlay_on">Disable Overlay</string>
     <string name="saving_off">Save Data</string>

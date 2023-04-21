@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
 import android.provider.Settings
+import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -14,10 +15,15 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nakkeez.frametempmonitor.data.FrameTempDatabase
 import com.nakkeez.frametempmonitor.model.BatteryTempUpdater
 import com.nakkeez.frametempmonitor.data.FrameTempRepository
+import com.nakkeez.frametempmonitor.model.CpuTemperature
+import com.nakkeez.frametempmonitor.model.CpuTemperature.Companion.getCpuTemperature
 import com.nakkeez.frametempmonitor.model.FrameRateHandler
 import com.nakkeez.frametempmonitor.preferences.SettingsActivity
 import com.nakkeez.frametempmonitor.service.OverlayService
 import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.util.*
 
 /**
  * MainActivity that calculates the frame rate and battery temperature and
@@ -26,18 +32,13 @@ import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
  */
 class MainActivity : AppCompatActivity() {
     var isOverlayVisible = false
-    private var isStoring = false
 
-    // Variables for getting battery temperature
     private lateinit var batteryTempUpdater: BatteryTempUpdater
-
-    // Variables to use with frame rate calculations
-    private var frameCount = 0
-    private var lastFrameTime: Long = 0
 
     private lateinit var frameRateHandler: FrameRateHandler
 
-    // Create an instance of Database and Repository Pattern
+    private val cpuTempTimer = Timer()
+
     private lateinit var frameTempDatabase: FrameTempDatabase
     private lateinit var frameTempRepository: FrameTempRepository
     private lateinit var frameTempViewModel: FrameTempViewModel
@@ -120,6 +121,20 @@ class MainActivity : AppCompatActivity() {
             // Start tracking battery temperature
             batteryTempUpdater.startUpdatingBatteryTemperature()
         }
+
+        val cpuTemperatureTextView: TextView = findViewById(R.id.cpuTextView)
+
+        // Make the timer check CPU temperature every second
+        cpuTempTimer.scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                runOnUiThread {
+                    val cpuTemperature = getCpuTemperature()
+                    if (cpuTemperature != null) {
+                        cpuTemperatureTextView.text = getString(R.string.cpu_temp, cpuTemperature)
+                    }
+                }
+            }
+        }, 0, 1000)
     }
 
     override fun onDestroy() {
@@ -130,5 +145,8 @@ class MainActivity : AppCompatActivity() {
 
         // Remove any pending callbacks for the battery temperature Runnable
         batteryTempUpdater.stopUpdatingBatteryTemperature()
+
+        // Stop the timer that track CPU temperature data
+        cpuTempTimer.cancel()
     }
 }
