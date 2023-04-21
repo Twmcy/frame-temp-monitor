@@ -39,7 +39,7 @@ class FrameRateHandler(
                         frameCount = 0
                         lastFrameTime = currentTime
 
-                        val fpsRounded = String.format("%.2f", fps)
+                        val fpsRounded = String.format("%.1f", fps)
 
                         // Replace commas with dots, because finnish phones etc. use commas
                         val fpsReplaced = fpsRounded.replace(",", ".")

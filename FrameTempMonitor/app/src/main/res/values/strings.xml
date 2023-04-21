@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">FrameTemp Monitor</string>
     <!-- Main Activity -->
-    <string name="frames_per_second">Frames per Second: %.2f</string>
+    <string name="frames_per_second">Frames per Second: %.1f</string>
     <string name="battery_temp">Battery temperature: %.1f\u00B0C</string>
     <string name="overlay_off">Enable Overlay</string>
     <string name="overlay_on">Disable Overlay</string>
@@ -14,7 +14,7 @@
     <string name="loading">Loading…</string>
 
     <!-- FrameTempDataActivity -->
-    <string name="data_fps">FPS: %.2f — </string>
+    <string name="data_fps">FPS: %.1f — </string>
     <string name="data_temp">TEMP: %.1f\u00B0C</string>
     <string name="data_time">TIME: %s</string>
     <string name="fab_delete">Delete saved data</string>
