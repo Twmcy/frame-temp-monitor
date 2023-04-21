@@ -49,11 +49,12 @@ class MainActivity : AppCompatActivity() {
 
         // Get the values for user's preferences
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
-        val showFrameRate = sharedPreferences.getBoolean("frame_rate", true)
-        val showBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
+        val preferenceFrameRate = sharedPreferences.getBoolean("frame_rate", true)
+        val preferenceBatteryTemp = sharedPreferences.getBoolean("battery_temperature", true)
+        val preferenceCpuTemp = sharedPreferences.getBoolean("cpu_temperature", true)
 
         frameTempDatabase = FrameTempDatabase.getInstance(applicationContext)
-        frameTempRepository = FrameTempRepository(frameTempDatabase, showFrameRate, showBatteryTemp)
+        frameTempRepository = FrameTempRepository(frameTempDatabase, preferenceFrameRate, preferenceBatteryTemp)
 
         // Initialize the FrameTempViewModel using the ViewModelProvider
         frameTempViewModel = ViewModelProvider(this, FrameTempViewModel.FrameTempViewModelFactory(frameTempRepository))[FrameTempViewModel::class.java]
@@ -100,7 +101,7 @@ class MainActivity : AppCompatActivity() {
 
         frameRateHandler = FrameRateHandler(frameTempRepository, null)
 
-        if (showFrameRate) {
+        if (preferenceFrameRate) {
             // Start observing the frame rate values from ViewModel
             frameTempViewModel.frameRate.observe(this) { frameRate ->
                 val fpsText = getString(R.string.frames_per_second, frameRate)
@@ -112,7 +113,7 @@ class MainActivity : AppCompatActivity() {
 
         batteryTempUpdater = BatteryTempUpdater(this, frameTempRepository, null)
 
-        if (showBatteryTemp) {
+        if (preferenceBatteryTemp) {
             // Start observing battery temperature values from ViewModel
             frameTempViewModel.batteryTemp.observe(this) { batteryTemp ->
                 val tempText =  getString(R.string.battery_temp, batteryTemp)
@@ -122,19 +123,29 @@ class MainActivity : AppCompatActivity() {
             batteryTempUpdater.startUpdatingBatteryTemperature()
         }
 
-        val cpuTemperatureTextView: TextView = findViewById(R.id.cpuTextView)
+        val cpuTextView: TextView = findViewById(R.id.cpuTextView)
 
-        // Make the timer check CPU temperature every second
-        cpuTempTimer.scheduleAtFixedRate(object : TimerTask() {
-            override fun run() {
-                runOnUiThread {
-                    val cpuTemperature = getCpuTemperature()
-                    if (cpuTemperature != null) {
-                        cpuTemperatureTextView.text = getString(R.string.cpu_temp, cpuTemperature)
+        if (preferenceCpuTemp) {
+            // Start observing the CPU temperature values from ViewModel
+            frameTempViewModel.cpuTemp.observe(this) { cpuTemp ->
+                val cpuText = getString(R.string.cpu_temp, cpuTemp)
+                cpuTextView.text = cpuText
+            }
+
+            // Make the timer check CPU temperature every second
+            cpuTempTimer.scheduleAtFixedRate(object : TimerTask() {
+                override fun run() {
+                    runOnUiThread {
+                        val cpuTemperature = getCpuTemperature()
+                        if (cpuTemperature != null) {
+                            frameTempViewModel.updateCpuTemp(cpuTemperature)
+                        } else {
+                            cpuTempTimer.cancel() // Stop the timer if temperature not found
+                        }
                     }
                 }
-            }
-        }, 0, 1000)
+            }, 0, 1000)
+        }
     }
 
     override fun onDestroy() {

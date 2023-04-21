@@ -17,12 +17,19 @@ class FrameTempViewModel(private val repository: FrameTempRepository) : ViewMode
     val batteryTemp: LiveData<Float>
         get() = repository.batteryTemp
 
+    val cpuTemp: LiveData<Float>
+        get() = repository.cpuTemp
+
     fun updateFrameRate(fps: Float) {
         repository.updateFrameRate(fps)
     }
 
-    fun updateBatteryTemp(temp: Float) {
-        repository.updateBatteryTemp(temp)
+    fun updateBatteryTemp(tempBattery: Float) {
+        repository.updateBatteryTemp(tempBattery)
+    }
+
+    fun updateCpuTemp(tempCpu: Float) {
+        repository.updateCpuTemp(tempCpu)
     }
 
     class FrameTempViewModelFactory(private val repository: FrameTempRepository) :

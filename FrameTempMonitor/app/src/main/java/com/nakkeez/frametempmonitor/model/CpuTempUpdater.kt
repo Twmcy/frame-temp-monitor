@@ -34,6 +34,7 @@ class CpuTemperature {
                 try {
                     val process = Runtime.getRuntime().exec("cat $path")
                     val reader = BufferedReader(InputStreamReader(process.inputStream))
+                    // Convert from milli-degrees Celsius to Celsius
                     val temperature = reader.readLine().toFloat() / 1000.0
 
                     if (temperature > 0) {

@@ -24,6 +24,7 @@
     <string name="overlay_header">Overlay Settings</string>
     <string name="fps_show">Track frame rate</string>
     <string name="temp_show">Track battery temperature</string>
+    <string name="cpu_show">Track CPU temperature</string>
     <string name="button_show">Show Save button</string>
     <string name="font_show">Overlay font size</string>
 

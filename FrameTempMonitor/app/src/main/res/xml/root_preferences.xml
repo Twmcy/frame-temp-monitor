@@ -17,6 +17,11 @@
             app:defaultValue="true"/>
 
         <SwitchPreferenceCompat
+            app:key="cpu_temperature"
+            app:title="@string/cpu_show"
+            app:defaultValue="true"/>
+
+        <SwitchPreferenceCompat
             app:key="save_button"
             app:title="@string/button_show"
             app:defaultValue="true"/>

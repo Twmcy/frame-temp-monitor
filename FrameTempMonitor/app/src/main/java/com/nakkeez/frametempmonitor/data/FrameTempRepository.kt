@@ -28,6 +28,10 @@ class FrameTempRepository(
     val batteryTemp: LiveData<Float>
         get() = _batteryTemp
 
+    private val _cpuTemp = MutableLiveData<Float>()
+    val cpuTemp: LiveData<Float>
+        get() = _cpuTemp
+
     // Whether the repository is currently storing data or not
     private var isStoring = false
     // The job that runs the data storage task
@@ -49,8 +53,8 @@ class FrameTempRepository(
         }
     }
 
-    fun updateBatteryTemp(temp: Float) {
-        _batteryTemp.value = temp
+    fun updateBatteryTemp(tempBattery: Float) {
+        _batteryTemp.value = tempBattery
 
         // Add data to the buffer if user wants to track battery temperature
         // but not frame rate
@@ -58,10 +62,14 @@ class FrameTempRepository(
             dataBuffer.add(
                 FrameTempData(
                     frameRate = _frameRate.value ?: 0f,
-                    batteryTemp = temp
+                    batteryTemp = tempBattery
                 )
             )
         }
+    }
+
+    fun updateCpuTemp(tempCpu: Float) {
+        _cpuTemp.value = tempCpu
     }
 
     fun startStoringData() {
