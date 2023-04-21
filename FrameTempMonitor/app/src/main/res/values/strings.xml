@@ -15,8 +15,9 @@
     <string name="loading">Loading…</string>
 
     <!-- FrameTempDataActivity -->
-    <string name="data_fps">FPS: %.1f — </string>
-    <string name="data_temp"> TEMP: %.1f\u00B0C</string>
+    <string name="data_fps">FPS: %.1f—</string>
+    <string name="data_battery">BAT: %.1f\u00B0C—</string>
+    <string name="data_cpu">CPU: %.1f\u00B0C</string>
     <string name="data_time">TIME: %s</string>
     <string name="fab_delete">Delete saved data</string>
 

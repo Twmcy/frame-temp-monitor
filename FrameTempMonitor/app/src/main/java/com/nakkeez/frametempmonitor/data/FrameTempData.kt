@@ -14,6 +14,7 @@ data class FrameTempData(
     val id: Long = 0,
     val frameRate: Float,
     val batteryTemp: Float,
+    val cpuTemp: Float,
     // Timestamp for when the data was captured. Depends on the user's time zone
     val timestamp: ZonedDateTime = ZonedDateTime.now(ZoneId.systemDefault())
 )

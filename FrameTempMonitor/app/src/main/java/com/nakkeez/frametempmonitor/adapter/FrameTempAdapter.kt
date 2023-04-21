@@ -32,7 +32,8 @@ class FrameTempAdapter(private val data: List<FrameTempData>) :
     // Define a ViewHolder that holds the views for a single item in the list
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val frameDataTextView: TextView = itemView.findViewById(R.id.frameDataTextView)
-        private val tempDataTextView: TextView = itemView.findViewById(R.id.tempDataTextView)
+        private val batteryDataTextView: TextView = itemView.findViewById(R.id.batteryDataTextView)
+        private val cpuDataTextView: TextView = itemView.findViewById(R.id.cpuDataTextView)
         private val timeDataTextView: TextView = itemView.findViewById(R.id.timeDataTextView)
 
         // Bind the FrameTempData object's attributes to the Views in the item view
@@ -41,9 +42,13 @@ class FrameTempAdapter(private val data: List<FrameTempData>) :
                 itemView.context.getString(R.string.data_fps),
                 frameTempData.frameRate
             )
-            tempDataTextView.text = String.format(
-                itemView.context.getString(R.string.data_temp),
+            batteryDataTextView.text = String.format(
+                itemView.context.getString(R.string.data_battery),
                 frameTempData.batteryTemp
+            )
+            cpuDataTextView.text = String.format(
+                itemView.context.getString(R.string.data_cpu),
+                frameTempData.cpuTemp
             )
             timeDataTextView.text = String.format(
                 itemView.context.getString(R.string.data_time),

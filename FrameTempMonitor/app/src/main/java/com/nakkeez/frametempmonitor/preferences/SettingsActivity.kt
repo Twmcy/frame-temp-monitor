@@ -57,6 +57,13 @@ class SettingsActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
             }
+            if ((preference.key == "cpu_temperature") && (newValue is Boolean) && newValue) {
+                Toast.makeText(
+                    context,
+                    "This application may not be able to track CPU temperature on every device",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
 
             return true
         }

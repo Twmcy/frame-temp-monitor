@@ -47,7 +47,8 @@ class FrameTempRepository(
             dataBuffer.add(
                 FrameTempData(
                     frameRate = fps,
-                    batteryTemp = _batteryTemp.value ?: 0f
+                    batteryTemp = _batteryTemp.value ?: 0f,
+                    cpuTemp = _cpuTemp.value ?: 0f,
                 )
             )
         }
@@ -62,7 +63,8 @@ class FrameTempRepository(
             dataBuffer.add(
                 FrameTempData(
                     frameRate = _frameRate.value ?: 0f,
-                    batteryTemp = tempBattery
+                    batteryTemp = tempBattery,
+                    cpuTemp = _cpuTemp.value ?: 0f,
                 )
             )
         }
@@ -70,6 +72,17 @@ class FrameTempRepository(
 
     fun updateCpuTemp(tempCpu: Float) {
         _cpuTemp.value = tempCpu
+
+        // Add data to the buffer if user wants to track only CPU temperature
+        if ((isStoring && !preferenceBatteryTemp && !preferenceFrameRate)) {
+            dataBuffer.add(
+                FrameTempData(
+                    frameRate = _frameRate.value ?: 0f,
+                    batteryTemp = _batteryTemp.value ?: 0f,
+                    cpuTemp = tempCpu
+                )
+            )
+        }
     }
 
     fun startStoringData() {

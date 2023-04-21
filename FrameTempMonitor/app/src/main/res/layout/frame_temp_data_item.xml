@@ -19,10 +19,16 @@
             android:text="@string/data_fps" />
 
         <TextView
-            android:id="@+id/tempDataTextView"
+            android:id="@+id/batteryDataTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/data_temp" />
+            android:text="@string/data_battery" />
+
+        <TextView
+            android:id="@+id/cpuDataTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/data_cpu" />
 
     </LinearLayout>
 

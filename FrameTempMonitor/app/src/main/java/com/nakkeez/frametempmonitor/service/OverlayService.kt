@@ -103,7 +103,7 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
             text = getString(R.string.saving_off)
 
             setOnClickListener {
-                saveData(preferenceFrameRate, preferenceBatteryTemp)
+                saveData(preferenceFrameRate, preferenceBatteryTemp, preferenceCpuTemp)
             }
 
             layoutParams = LinearLayout.LayoutParams(
@@ -303,8 +303,12 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         return false
     }
 
-    private fun saveData(preferenceFrameRate: Boolean, preferenceBatteryTemp: Boolean) {
-        if (!preferenceFrameRate && !preferenceBatteryTemp) {
+    private fun saveData(
+        preferenceFrameRate: Boolean,
+        preferenceBatteryTemp: Boolean,
+        preferenceCpuTemp: Boolean
+    ) {
+        if (!preferenceFrameRate && !preferenceBatteryTemp && !preferenceCpuTemp) {
             Toast.makeText(
                 this,
                 "Enable frame rate or temperature tracking from settings to save data",
