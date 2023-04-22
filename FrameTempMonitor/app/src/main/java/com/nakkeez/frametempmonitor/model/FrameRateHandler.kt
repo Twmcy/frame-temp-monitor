@@ -9,7 +9,7 @@ import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
 
 /**
- * Calculates the frame rate the system is running on
+ * Calculates the frame rate the device's display is running on.
  */
 class FrameRateHandler(
     private val frameTempRepository: FrameTempRepository?,
