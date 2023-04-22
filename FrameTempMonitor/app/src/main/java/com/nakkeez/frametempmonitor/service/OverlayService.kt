@@ -9,6 +9,7 @@ import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.*
 import android.widget.Button
 import android.widget.LinearLayout
@@ -199,31 +200,46 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         frameRateHandler = FrameRateHandler(frameTempRepository, null)
 
         if (preferenceFrameRate) {
-            // start the frame rate calculations
-            frameRateHandler.startCalculatingFrameRate()
+            try {
+                // Start the frame rate calculations
+                frameRateHandler.startCalculatingFrameRate()
+            } catch (_: Exception) {
+                Toast.makeText(this, "Failed to start tracking frame rate", Toast.LENGTH_LONG)
+                    .show()
+            }
         }
 
         batteryTempUpdater = BatteryTempUpdater(this, frameTempRepository, null)
 
         if (preferenceBatteryTemp) {
-            // Start tracking battery temperature
-            batteryTempUpdater.startUpdatingBatteryTemperature()
+            try {
+                // Start tracking battery temperature
+                batteryTempUpdater.startUpdatingBatteryTemperature()
+            } catch (_: Exception) {
+                Toast.makeText(this, "Failed to start tracking battery temperature", Toast.LENGTH_LONG)
+                    .show()
+            }
         }
 
         if (preferenceCpuTemp) {
-            // Make the timer check CPU temperature every second
-            cpuTempTimer.scheduleAtFixedRate(object : TimerTask() {
-                override fun run() {
-                    cpuHandler.post {
-                        val cpuTemperature = CpuTemperature.getCpuTemperature()
-                        if (cpuTemperature != null) {
-                            frameTempRepository.updateCpuTemp(cpuTemperature)
-                        } else {
-                            cpuTempTimer.cancel() // Stop the timer if temperature not found
+            try {
+                // Make the timer check CPU temperature every second
+                cpuTempTimer.scheduleAtFixedRate(object : TimerTask() {
+                    override fun run() {
+                        cpuHandler.post {
+                            val cpuTemperature = CpuTemperature.getCpuTemperature()
+                            if (cpuTemperature != null) {
+                                frameTempRepository.updateCpuTemp(cpuTemperature)
+                            } else {
+                                cpuTempTimer.cancel() // Stop the timer if temperature not found
+                            }
                         }
                     }
-                }
-            }, 0, 1000)
+                }, 0, 1000)
+            } catch (_: Exception) {
+                Toast.makeText(this, "Failed to start tracking CPU temperature", Toast.LENGTH_LONG)
+                    .show()
+            }
         }
     }
 
@@ -236,15 +252,25 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
 
             // Set isOverlayVisible to false
             (applicationContext as MainActivity).isOverlayVisible = false
-        } catch (_: Exception) {
-        }
+        } catch (_: Exception) { }
 
-        // Quit the Thread that calculates frame rates
-        frameRateHandler.stopCalculatingFrameRate()
-        // Remove any pending callbacks for the battery temperature Runnable
-        batteryTempUpdater.stopUpdatingBatteryTemperature()
-        // Stop the timer that track CPU temperature data
-        cpuTempTimer.cancel()
+        try {
+            // Quit the Thread that calculates frame rates
+            frameRateHandler.stopCalculatingFrameRate()
+        } catch (_: Exception) { }
+
+        try {
+            // Remove any pending callbacks for the battery temperature Runnable
+            batteryTempUpdater.stopUpdatingBatteryTemperature()
+        } catch (_: Exception) { }
+
+        try {
+            // Stop the timer that track CPU temperature data
+            cpuTempTimer.cancel()
+        } catch (e: Exception) { }
+
+
+
     }
 
     override fun onTouch(view: View, event: MotionEvent): Boolean {

@@ -54,10 +54,14 @@ class MainActivity : AppCompatActivity() {
         val preferenceCpuTemp = sharedPreferences.getBoolean("cpu_temperature", true)
 
         frameTempDatabase = FrameTempDatabase.getInstance(applicationContext)
-        frameTempRepository = FrameTempRepository(frameTempDatabase, preferenceFrameRate, preferenceBatteryTemp)
+        frameTempRepository =
+            FrameTempRepository(frameTempDatabase, preferenceFrameRate, preferenceBatteryTemp)
 
         // Initialize the FrameTempViewModel using the ViewModelProvider
-        frameTempViewModel = ViewModelProvider(this, FrameTempViewModel.FrameTempViewModelFactory(frameTempRepository))[FrameTempViewModel::class.java]
+        frameTempViewModel = ViewModelProvider(
+            this,
+            FrameTempViewModel.FrameTempViewModelFactory(frameTempRepository)
+        )[FrameTempViewModel::class.java]
 
         // Set a button for navigating to SettingsActivity
         val fabButton = findViewById<FloatingActionButton>(R.id.floatingActionButton)
@@ -107,8 +111,14 @@ class MainActivity : AppCompatActivity() {
                 val fpsText = getString(R.string.frames_per_second, frameRate)
                 fpsTextView.text = fpsText
             }
-            // start the frame rate calculations
-            frameRateHandler.startCalculatingFrameRate()
+
+            try {
+                // start the frame rate calculations
+                frameRateHandler.startCalculatingFrameRate()
+            } catch (_: Exception) {
+                Toast.makeText(this, "Failed to start tracking frame rate", Toast.LENGTH_LONG)
+                    .show()
+            }
         }
 
         batteryTempUpdater = BatteryTempUpdater(this, frameTempRepository, null)
@@ -116,11 +126,17 @@ class MainActivity : AppCompatActivity() {
         if (preferenceBatteryTemp) {
             // Start observing battery temperature values from ViewModel
             frameTempViewModel.batteryTemp.observe(this) { batteryTemp ->
-                val tempText =  getString(R.string.battery_temp, batteryTemp)
+                val tempText = getString(R.string.battery_temp, batteryTemp)
                 tempTextView.text = tempText
             }
-            // Start tracking battery temperature
-            batteryTempUpdater.startUpdatingBatteryTemperature()
+
+            try {
+                // Start tracking battery temperature
+                batteryTempUpdater.startUpdatingBatteryTemperature()
+            } catch (_: Exception) {
+                Toast.makeText(this, "Failed to start tracking battery temperature", Toast.LENGTH_LONG)
+                    .show()
+            }
         }
 
         val cpuTextView: TextView = findViewById(R.id.cpuTextView)
@@ -132,19 +148,24 @@ class MainActivity : AppCompatActivity() {
                 cpuTextView.text = cpuText
             }
 
-            // Make the timer check CPU temperature every second
-            cpuTempTimer.scheduleAtFixedRate(object : TimerTask() {
-                override fun run() {
-                    runOnUiThread {
-                        val cpuTemperature = getCpuTemperature()
-                        if (cpuTemperature != null) {
-                            frameTempViewModel.updateCpuTemp(cpuTemperature)
-                        } else {
-                            cpuTempTimer.cancel() // Stop the timer if temperature not found
+            try {
+                // Make the timer check CPU temperature every second
+                cpuTempTimer.scheduleAtFixedRate(object : TimerTask() {
+                    override fun run() {
+                        runOnUiThread {
+                            val cpuTemperature = getCpuTemperature()
+                            if (cpuTemperature != null) {
+                                frameTempViewModel.updateCpuTemp(cpuTemperature)
+                            } else {
+                                cpuTempTimer.cancel() // Stop the timer if temperature not found
+                            }
                         }
                     }
-                }
-            }, 0, 1000)
+                }, 0, 1000)
+            } catch (_: Exception) {
+                Toast.makeText(this, "Failed to start tracking CPU temperature", Toast.LENGTH_LONG)
+                    .show()
+            }
         }
     }
 
