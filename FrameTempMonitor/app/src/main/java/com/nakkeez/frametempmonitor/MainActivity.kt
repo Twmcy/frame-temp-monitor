@@ -172,13 +172,22 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
 
-        // Quit the Thread that calculates frame rates
-        frameRateHandler.stopCalculatingFrameRate()
+        try {
+            // Quit the Thread that calculates frame rates
+            frameRateHandler.stopCalculatingFrameRate()
+        } catch (_: Exception) {
+        }
 
-        // Remove any pending callbacks for the battery temperature Runnable
-        batteryTempUpdater.stopUpdatingBatteryTemperature()
+        try {
+            // Remove any pending callbacks for the battery temperature Runnable
+            batteryTempUpdater.stopUpdatingBatteryTemperature()
+        } catch (_: Exception) {
+        }
 
-        // Stop the timer that track CPU temperature data
-        cpuTempTimer.cancel()
+        try {
+            // Stop the timer that track CPU temperature data
+            cpuTempTimer.cancel()
+        } catch (_: Exception) {
+        }
     }
 }

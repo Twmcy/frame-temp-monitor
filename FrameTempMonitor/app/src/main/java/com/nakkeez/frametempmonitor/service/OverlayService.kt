@@ -216,7 +216,11 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
                 // Start tracking battery temperature
                 batteryTempUpdater.startUpdatingBatteryTemperature()
             } catch (_: Exception) {
-                Toast.makeText(this, "Failed to start tracking battery temperature", Toast.LENGTH_LONG)
+                Toast.makeText(
+                    this,
+                    "Failed to start tracking battery temperature",
+                    Toast.LENGTH_LONG
+                )
                     .show()
             }
         }
@@ -252,25 +256,26 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
 
             // Set isOverlayVisible to false
             (applicationContext as MainActivity).isOverlayVisible = false
-        } catch (_: Exception) { }
+        } catch (_: Exception) {
+        }
 
         try {
             // Quit the Thread that calculates frame rates
             frameRateHandler.stopCalculatingFrameRate()
-        } catch (_: Exception) { }
+        } catch (_: Exception) {
+        }
 
         try {
             // Remove any pending callbacks for the battery temperature Runnable
             batteryTempUpdater.stopUpdatingBatteryTemperature()
-        } catch (_: Exception) { }
+        } catch (_: Exception) {
+        }
 
         try {
             // Stop the timer that track CPU temperature data
             cpuTempTimer.cancel()
-        } catch (e: Exception) { }
-
-
-
+        } catch (_: Exception) {
+        }
     }
 
     override fun onTouch(view: View, event: MotionEvent): Boolean {
