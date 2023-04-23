@@ -76,21 +76,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(dataIntent)
         }
 
-        val overlayButton = findViewById<Button>(R.id.overlayButton)
-        overlayButton.setOnClickListener {
-            isOverlayVisible = if (isOverlayVisible) {
-                val intent = Intent(this, OverlayService::class.java)
-                stopService(intent)
-                overlayButton.text = getString(R.string.overlay_off)
-                false
-            } else {
-                val intent = Intent(this, OverlayService::class.java)
-                startService(intent)
-                overlayButton.text = getString(R.string.overlay_on)
-                true
-            }
-        }
-
+        // Check if the permission to draw over other apps is given
         if (!Settings.canDrawOverlays(this)) {
             // Show alert dialog to the user saying a separate permission is needed
             val intent = Intent(
@@ -98,6 +84,31 @@ class MainActivity : AppCompatActivity() {
                 Uri.parse("package:$packageName")
             )
             startActivity(intent)
+        }
+
+        val overlayButton = findViewById<Button>(R.id.overlayButton)
+
+        overlayButton.setOnClickListener {
+            if (Settings.canDrawOverlays(this)) {
+                isOverlayVisible = if (isOverlayVisible) {
+                    val intent = Intent(this, OverlayService::class.java)
+                    stopService(intent)
+                    overlayButton.text = getString(R.string.overlay_off)
+                    false
+                } else {
+                    val intent = Intent(this, OverlayService::class.java)
+                    startService(intent)
+                    overlayButton.text = getString(R.string.overlay_on)
+                    true
+                }
+            } else {
+                Toast.makeText(
+                    this,
+                    "You will need to enable the permission to display over other applications",
+                    Toast.LENGTH_LONG
+                )
+                    .show()
+            }
         }
 
         val fpsTextView = findViewById<TextView>(R.id.fpsTextView)
@@ -134,7 +145,11 @@ class MainActivity : AppCompatActivity() {
                 // Start tracking battery temperature
                 batteryTempUpdater.startUpdatingBatteryTemperature()
             } catch (_: Exception) {
-                Toast.makeText(this, "Failed to start tracking battery temperature", Toast.LENGTH_LONG)
+                Toast.makeText(
+                    this,
+                    "Failed to start tracking battery temperature",
+                    Toast.LENGTH_LONG
+                )
                     .show()
             }
         }
