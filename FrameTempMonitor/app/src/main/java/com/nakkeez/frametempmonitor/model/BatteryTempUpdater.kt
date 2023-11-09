@@ -11,19 +11,28 @@ import kotlinx.coroutines.*
 import java.lang.Runnable
 
 /**
- * Tracks the battery temperature from the system
+ * Utility class for tracking device's battery temperature.
+ * @property context Application context.
+ * @property frameTempRepository Repository for managing performance data storage.
+ * @property frameTempViewModel ViewModel for handling UI-related data operations.
  */
 class BatteryTempUpdater(
     private val context: Context,
     private val frameTempRepository: FrameTempRepository?,
     private val frameTempViewModel: FrameTempViewModel?
 ) {
+    // Handler for scheduling periodic battery temperature updates
     private lateinit var handler: Handler
+    // Runnable task for updating battery temperature at regular intervals
     private lateinit var runnable: Runnable
+    // Job for checking and updating battery temperature asynchronously
     private var batteryCheck: Job? = null
 
+    /**
+     * Starts updating battery temperature at regular intervals.
+     */
     fun startUpdatingBatteryTemperature() {
-        // Create a Handler and a Runnable to get battery temperature
+        // Create a Handler and a Runnable for getting the battery temperature
         handler = Handler()
         runnable = object : Runnable {
             override fun run() {
@@ -35,6 +44,9 @@ class BatteryTempUpdater(
         handler.postDelayed(runnable, 1000)
     }
 
+    /**
+     * Stops updating battery temperature.
+     */
     fun stopUpdatingBatteryTemperature() {
         // Remove any pending callbacks for the battery temperature Runnable if it was started
         if (::handler.isInitialized && ::runnable.isInitialized) {
@@ -42,6 +54,9 @@ class BatteryTempUpdater(
         }
     }
 
+    /**
+     * Tracks and updates battery temperature asynchronously.
+     */
     private fun updateBatteryTemperature() {
         batteryCheck?.cancel() // Cancel any existing job
         // Get the battery temperature from the system
@@ -53,10 +68,10 @@ class BatteryTempUpdater(
             )
             val temperature = batteryIntent?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) ?: 0
             val temperatureInCelsius = temperature / 10f
-            // Save the calculated frame rate to the repository using main thread
+            // Save the calculated temperature value using the main thread
             withContext(Dispatchers.Main) {
-                // update LiveData from ViewModel/Repository depending if the calculations
-                // are made from OverlayService or MainActivity
+                // Update LiveData of ViewModel/Repository depending if it is
+                // MainActivity/OverlayService who is tracking the temperature.
                 frameTempViewModel?.updateBatteryTemp(temperatureInCelsius)
                 frameTempRepository?.updateBatteryTemp(temperatureInCelsius)
             }

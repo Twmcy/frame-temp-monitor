@@ -5,13 +5,16 @@ import androidx.room.Room
 import com.nakkeez.frametempmonitor.data.FrameTempDatabase
 
 /**
- * Main application for the FrameTemp Monitor that build the database
+ * Custom Application class for initializing the database instance.
  */
 class FrameTempApplication : Application() {
     companion object {
         lateinit var database: FrameTempDatabase
     }
 
+    /**
+     * Initializes the database instance when the application is starting.
+     */
     override fun onCreate() {
         super.onCreate()
 

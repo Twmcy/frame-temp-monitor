@@ -27,12 +27,13 @@ import com.nakkeez.frametempmonitor.model.FrameRateHandler
 import java.util.*
 
 /**
- * LifecycleService for displaying an overlay on the foreground with frame rate and
- * battery temperature data. Has a button for storing captured performance data
+ * LifecycleService for displaying an overlay with real-time performance data
+ * and a button for storing the performance data.
+ * Implements touch interactions for moving and clicking the overlay.
  */
 class OverlayService : LifecycleService(), View.OnTouchListener {
 
-    // Create variables for showing the overlay
+    // Variables for showing the overlay
     private lateinit var windowManager: WindowManager
     private lateinit var overlayView: View
     private var initialX: Int = 0
@@ -40,7 +41,7 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
 
     private lateinit var saveDataButton: Button
 
-    // Variable to track is Service is storing data
+    // Variable to track if Service is storing data
     private var isStoring = false
 
     private lateinit var batteryTempUpdater: BatteryTempUpdater
@@ -54,6 +55,9 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
     private lateinit var frameTempDatabase: FrameTempDatabase
     private lateinit var frameTempRepository: FrameTempRepository
 
+    /**
+     * Initializes variables and sets up overlay when the service is created.
+     */
     override fun onCreate() {
         super.onCreate()
 
@@ -247,6 +251,10 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         }
     }
 
+    /**
+     * Cleans up resources and stops background tasks when the service
+     * is destroyed.
+     */
     override fun onDestroy() {
         super.onDestroy()
 
@@ -278,6 +286,13 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         }
     }
 
+    /**
+     * Handles touch events for the overlay view, including moving and
+     * clicking actions.
+     * @param view The view being touched.
+     * @param event The MotionEvent representing the touch event.
+     * @return True if the touch event is handled, false otherwise.
+     */
     override fun onTouch(view: View, event: MotionEvent): Boolean {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -334,6 +349,13 @@ class OverlayService : LifecycleService(), View.OnTouchListener {
         return false
     }
 
+    /**
+     * Saves or stops saving performance data based on user preferences.
+     * Displays appropriate toasts for success or failure.
+     * @param preferenceFrameRate Whether frame rate tracking is enabled.
+     * @param preferenceBatteryTemp Whether battery temperature tracking is enabled.
+     * @param preferenceCpuTemp Whether CPU temperature tracking is enabled.
+     */
     private fun saveData(
         preferenceFrameRate: Boolean,
         preferenceBatteryTemp: Boolean,

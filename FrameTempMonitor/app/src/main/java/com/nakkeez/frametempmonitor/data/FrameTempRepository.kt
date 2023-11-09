@@ -10,8 +10,11 @@ import java.time.ZoneId
 import java.time.ZonedDateTime
 
 /**
- * Provides access to frame rate and battery temperature data and
- * manages storing data to the database
+ * Repository class for managing the storage and retrieval of performance data
+ * related to frame rate, battery temperature, and CPU temperature.
+ * @property frameTempDatabase Database instance for storing and retrieving performance data.
+ * @property preferenceFrameRate Boolean flag indicating whether to track frame rate.
+ * @property preferenceBatteryTemp Boolean flag indicating whether to track battery temperature.
  */
 class FrameTempRepository(
     private val frameTempDatabase: FrameTempDatabase,
@@ -32,13 +35,18 @@ class FrameTempRepository(
     val cpuTemp: LiveData<Float>
         get() = _cpuTemp
 
-    // Whether the repository is currently storing data or not
+    // Flag indicating whether the repository is currently storing data.
     private var isStoring = false
-    // The job that runs the data storage task
+    // The job resposible for running the data storage task
     private var storageJob: Job? = null
     // The buffer that holds performance data waiting to be stored
     private val dataBuffer = mutableListOf<FrameTempData>()
 
+    /**
+     * Updates the frame rate information and adds data to the buffer
+     * if tracking is enabled.
+     * @param fps Frame rate value.
+     */
     fun updateFrameRate(fps: Float) {
         _frameRate.value = fps
 
@@ -54,6 +62,11 @@ class FrameTempRepository(
         }
     }
 
+    /**
+     * Updates the battery temperature information and adds data to the buffer
+     * if tracking is enabled.
+     * @param tempBattery Battery temperature value.
+     */
     fun updateBatteryTemp(tempBattery: Float) {
         _batteryTemp.value = tempBattery
 
@@ -70,6 +83,11 @@ class FrameTempRepository(
         }
     }
 
+    /**
+     * Updates the CPU temperature information and adds data to the buffer
+     * if tracking is enabled.
+     * @param tempCpu CPU temperature value.
+     */
     fun updateCpuTemp(tempCpu: Float) {
         _cpuTemp.value = tempCpu
 
@@ -85,6 +103,9 @@ class FrameTempRepository(
         }
     }
 
+    /**
+     * Starts storing performance data in the database in global CoroutineScope.
+     */
     fun startStoringData() {
         // If not already storing data, start the storage job
         if (!isStoring) {
@@ -104,8 +125,11 @@ class FrameTempRepository(
         }
     }
 
+    /**
+     * Stops the storing of performance data in the database by canceling
+     * the global CoroutineScope.
+     */
     fun stopStoringData() {
-        // Stop storing data and cancel the storage job
         isStoring = false
         storageJob?.cancel()
     }

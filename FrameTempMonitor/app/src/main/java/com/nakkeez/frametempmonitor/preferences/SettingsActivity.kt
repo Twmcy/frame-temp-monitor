@@ -13,10 +13,15 @@ import com.nakkeez.frametempmonitor.MainActivity
 import com.nakkeez.frametempmonitor.R
 
 /**
- * Preferences screen
+ * Activity for managing user preferences.
  */
 class SettingsActivity : AppCompatActivity() {
 
+    /**
+     * Initializes the activity, sets up the UI, and adds the SettingsFragment
+     * to the container.
+     * @param savedInstanceState The saved state of the activity.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.settings_activity)
@@ -29,8 +34,17 @@ class SettingsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
     }
 
+    /**
+     * Fragment class responsible for displaying and handling preferences.
+     */
     class SettingsFragment : PreferenceFragmentCompat(), Preference.OnPreferenceChangeListener {
 
+        /**
+         * Creates preferences from the XML resource and initializes
+         * listeners for preference changes.
+         * @param savedInstanceState The saved state of the fragment.
+         * @param rootKey The key of the root preference.
+         */
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.root_preferences, rootKey)
 
@@ -42,6 +56,12 @@ class SettingsActivity : AppCompatActivity() {
             batteryTemperaturePreference?.onPreferenceChangeListener = this
         }
 
+        /**
+         * Handles preference changes and displays relevant messages to the user.
+         * @param preference The preference that changed.
+         * @param newValue The new value of the preference.
+         * @return True if the change should be applied.
+         */
         override fun onPreferenceChange(preference: Preference, newValue: Any?): Boolean {
             // Send a message to users telling about potential negative impacts these settings may cause
             if ((preference.key == "frame_rate") && (newValue is Boolean) && newValue) {
@@ -70,8 +90,13 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Handles the Up button presses by returning the user to MainActivity.
+     * @param item The selected menu item.
+     * @return True if the selection is handled, otherwise execute the
+     * default behaviour defined in the superclass.
+     */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Return to MainActivity when Up button is pressed
         when (item.itemId) {
             android.R.id.home -> {
                 val intent = Intent(this, MainActivity::class.java)

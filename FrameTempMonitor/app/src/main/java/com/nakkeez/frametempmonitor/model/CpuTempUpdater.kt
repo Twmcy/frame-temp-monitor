@@ -4,10 +4,11 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 
 /**
- * Goes through possible sensor paths of CPU temperature sensor and then reads
- * and converts the values to Celsius. The paths have been tested with
- * Xiaomi 10T Lite and wrong sensor have been commented out, leaving only
- * those couple of paths remaining that will show the CPU temperature.
+ * Utility class for tracking device's CPU temperature by looping through
+ * possible sensor paths and then reading and converting the values to Celsius.
+ * The paths have been tested with Xiaomi 10T Lite and wrong sensor have
+ * been commented out, leaving only those couple of paths remaining that
+ * will show the CPU temperature.
  */
 class CpuTemperature {
 
@@ -35,6 +36,11 @@ class CpuTemperature {
             // "/sys/devices/platform/s5p-tmu/curr_temp" // Nothing
         )
 
+        /**
+         * Loops through the array of possible paths to CPU temperature
+         * @return CPU temperature in celsius if correct path is found,
+         * otherwise null
+         */
         fun getCpuTemperature(): Float? {
             // Go through all the paths and check if there is sensor data
             for (path in paths) {

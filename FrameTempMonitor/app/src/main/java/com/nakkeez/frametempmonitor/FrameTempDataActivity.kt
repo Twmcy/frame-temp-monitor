@@ -15,8 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /**
- * Activity where saved frame rate and battery temperature values can be
- * viewed and deleted by the user.
+ * Activity responsible for displaying and managing saved performance data.
  */
 class FrameTempDataActivity : AppCompatActivity() {
 
@@ -24,6 +23,10 @@ class FrameTempDataActivity : AppCompatActivity() {
     private lateinit var adapter: FrameTempAdapter
     private lateinit var db: FrameTempDatabase
 
+    /**
+     * Initializes the activity, sets up the UI, and initializes necessary components.
+     * @param savedInstanceState The saved state of the activity.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_frame_temp_data)
@@ -48,9 +51,16 @@ class FrameTempDataActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Loads performance data from the Room database.
+     * @return List of performance data.
+     */
     private suspend fun loadFrameTempData(): List<FrameTempData> =
         withContext(Dispatchers.IO) { db.frameTempDao().getAll() }
 
+    /**
+     * Sets up the RecyclerView with performance data.
+     */
     private fun setupRecyclerView() {
         lifecycleScope.launch {
             val data = loadFrameTempData()
@@ -62,8 +72,13 @@ class FrameTempDataActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Handles the Up button presses by returning the user to MainActivity.
+     * @param item The selected menu item.
+     * @return True if the selection is handled, otherwise execute the
+     * default behaviour defined in the superclass.
+     */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Return to MainActivity when Up button is pressed
         when (item.itemId) {
             android.R.id.home -> {
                 finish()

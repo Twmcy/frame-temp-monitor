@@ -26,8 +26,9 @@ import java.io.InputStreamReader
 import java.util.*
 
 /**
- * MainActivity that calculates the frame rate and battery temperature and
- * displays them in a TextViews. User can start the OverlayService and navigate
+ * MainActivity class responsible for managing the main functionality of the app.
+ * The class calculates frame rates and battery temperatures and CPU temperatures
+ * while displaying them in TextViews. User can start the OverlayService and navigate
  * to the SettingsActivity or FrameTempDataActivity.
  */
 class MainActivity : AppCompatActivity() {
@@ -43,6 +44,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var frameTempRepository: FrameTempRepository
     private lateinit var frameTempViewModel: FrameTempViewModel
 
+    /**
+     * Initializes the activity, sets up the UI, and initializes necessary components.
+     * Starts to track performance data based on user preferences.
+     * @param savedInstanceState The saved state of the activity.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -184,6 +190,9 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Cleans up resources and stops background tasks when the activity is destroyed.
+     */
     override fun onDestroy() {
         super.onDestroy()
 

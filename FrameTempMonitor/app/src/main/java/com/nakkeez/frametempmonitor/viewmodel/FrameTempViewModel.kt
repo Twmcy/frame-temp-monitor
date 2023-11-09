@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModelProvider
 import com.nakkeez.frametempmonitor.data.FrameTempRepository
 
 /**
- * ViewModel used to store and observe the frame rate and battery temperature
- * values from UI.
+ * ViewModel for managing and providing access to FrameTempData-related data for UI components.
+ * @property repository The repository providing data access and manipulation.
  */
 class FrameTempViewModel(private val repository: FrameTempRepository) : ViewModel() {
 
@@ -20,18 +20,34 @@ class FrameTempViewModel(private val repository: FrameTempRepository) : ViewMode
     val cpuTemp: LiveData<Float>
         get() = repository.cpuTemp
 
+    /**
+     * Updates the frame rate data in the repository.
+     * @param fps The new frame rate value to be updated.
+     */
     fun updateFrameRate(fps: Float) {
         repository.updateFrameRate(fps)
     }
 
+    /**
+     * Updates the battery temperature data in the repository.
+     * @param tempBattery The new battery temperature value to be updated.
+     */
     fun updateBatteryTemp(tempBattery: Float) {
         repository.updateBatteryTemp(tempBattery)
     }
 
+    /**
+     * Updates the CPU temperature data in the repository.
+     * @param tempCpu The new CPU temperature value to be updated.
+     */
     fun updateCpuTemp(tempCpu: Float) {
         repository.updateCpuTemp(tempCpu)
     }
 
+    /**
+     * Factory class for creating instances of FrameTempViewModel.
+     * @property repository The repository providing data access and manipulation.
+     */
     class FrameTempViewModelFactory(private val repository: FrameTempRepository) :
         ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {

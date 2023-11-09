@@ -9,34 +9,53 @@ import com.nakkeez.frametempmonitor.R
 import com.nakkeez.frametempmonitor.data.FrameTempData
 
 /**
- * Defines a RecyclerView adapter for a list of FrameTempData objects.
+ * Adapter for managing and displaying a list of FrameTempData objects in a RecyclerView.
+ * @param data List of FrameTempData objects to be displayed.
  */
 class FrameTempAdapter(private val data: List<FrameTempData>) :
     RecyclerView.Adapter<FrameTempAdapter.ViewHolder>() {
 
-    // Create and return a ViewHolder for each item in the list
+    /**
+     * Creates a new ViewHolder by inflating the item view layout.
+     * @param parent The parent ViewGroup.
+     * @param viewType The type of the view.
+     * @return A new ViewHolder instance.
+     */
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.frame_temp_data_item, parent, false)
         return ViewHolder(view)
     }
 
-    // Bind the data to the ViewHolder for a given position
+    /**
+     * Binds data to the views in the ViewHolder for a given position.
+     * @param holder The ViewHolder to bind data to.
+     * @param position The position of the item in the data list.
+     */
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.bind(data[position])
     }
 
-    // Return the number of items in the list
+    /**
+     * Gets the total number of items in the data list.
+     * @return The number of items in the data list.
+     */
     override fun getItemCount(): Int = data.size
 
-    // Define a ViewHolder that holds the views for a single item in the list
+    /**
+     * ViewHolder class for holding the views of a single item in the RecyclerView.
+     * @param itemView The item view.
+     */
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val frameDataTextView: TextView = itemView.findViewById(R.id.frameDataTextView)
         private val batteryDataTextView: TextView = itemView.findViewById(R.id.batteryDataTextView)
         private val cpuDataTextView: TextView = itemView.findViewById(R.id.cpuDataTextView)
         private val timeDataTextView: TextView = itemView.findViewById(R.id.timeDataTextView)
 
-        // Bind the FrameTempData object's attributes to the Views in the item view
+        /**
+         * Binds FrameTempData object's attributes to the views in the item view.
+         * @param frameTempData The FrameTempData object to bind.
+         */
         fun bind(frameTempData: FrameTempData) {
             frameDataTextView.text = String.format(
                 itemView.context.getString(R.string.data_fps),

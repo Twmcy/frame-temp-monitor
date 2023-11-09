@@ -9,23 +9,30 @@ import com.nakkeez.frametempmonitor.data.FrameTempRepository
 import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
 
 /**
- * Calculates the frame rate the device's display is running on.
+ * Utility class for calculating and tracking the frame rate the
+ * device's display is running on.
+ * @property frameTempRepository Repository for managing performance data storage.
+ * @property frameTempViewModel ViewModel for handling UI-related data operations.
  */
 class FrameRateHandler(
     private val frameTempRepository: FrameTempRepository?,
     private val frameTempViewModel: FrameTempViewModel?
 ) {
-
+    // HandlerThread for handling frame rate calculations in a separate thread
     private val fpsHandlerThread = HandlerThread("FPSHandlerThread")
-
+    // Handler for updating frame rate calculations
     private lateinit var fpsHandler: Handler
-
-    // Create a handler for updating UI elements on the main thread
+    // Handler for updating UI elements on the main thread
     private val uiHandler = Handler(Looper.getMainLooper())
 
+    // Counter for tracking the number of frames processed
     private var frameCount = 0
+    // Timestamp of the last processed frame
     private var lastFrameTime = System.nanoTime()
 
+    /**
+     * Starts calculating and updating frame rate using a separate HandlerThread.
+     */
     fun startCalculatingFrameRate() {
         fpsHandlerThread.start()
 
@@ -47,10 +54,10 @@ class FrameRateHandler(
                         // Replace commas with dots, because finnish phones etc. use commas
                         val fpsReplaced = fpsRounded.replace(",", ".")
 
-                        // Save the calculated frame rate to the repository using main thread
+                        // Save the calculated frame rate value using main thread
                         uiHandler.post {
-                            // update LiveData from ViewModel/Repository depending if the calculations
-                            // are made from OverlayService or MainActivity
+                            // Update LiveData of ViewModel/Repository depending if it is
+                            // MainActivity/OverlayService who is tracking the frame rate
                             frameTempViewModel?.updateFrameRate(fpsReplaced.toFloat())
                             frameTempRepository?.updateFrameRate(fpsReplaced.toFloat())
                         }
@@ -64,6 +71,9 @@ class FrameRateHandler(
         }
     }
 
+    /**
+     * Stops calculating frame rate and quits the HandlerThread.
+     */
     fun stopCalculatingFrameRate() {
         fpsHandlerThread.quitSafely()
     }

@@ -4,13 +4,16 @@ import androidx.room.TypeConverter
 import java.time.ZonedDateTime
 
 /**
- * The ZonedDateTimeConverter class is a type converter that converts
- * a ZonedDateTime object to a Long timestamp value for storing in the
- * database, and other way around.
+ * Type converter class for converting a ZonedDateTime object to a Long
+ * timestamp value for storing into the database, and other way around.
  * This is needed because Room database does not support ZonedDateTime format.
  */
 class ZonedDateTimeConverter {
-    // Converts a Long timestamp value to a ZonedDateTime object.
+    /**
+     * Converts a Long timestamp value to a ZonedDateTime object.
+     * @param value Long timestamp value.
+     * @return ZonedDateTime object converted from the timestamp value.
+     */
     @TypeConverter
     fun fromTimestamp(value: Long?): ZonedDateTime? {
         return value?.let {
@@ -18,8 +21,12 @@ class ZonedDateTimeConverter {
         }
     }
 
+    /**
+     * Converts a ZonedDateTime object to a Long timestamp value.
+     * @param value ZonedDateTime object.
+     * @return Long timestamp value converted from the ZonedDateTime object.
+     */
     @TypeConverter
-    // Converts a ZonedDateTime object to a Long timestamp value.
     fun toTimestamp(value: ZonedDateTime?): Long? {
         return value?.toInstant()?.toEpochMilli()
     }
