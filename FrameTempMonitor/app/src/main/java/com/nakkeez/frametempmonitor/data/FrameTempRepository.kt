@@ -6,8 +6,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.time.ZoneId
-import java.time.ZonedDateTime
 
 /**
  * Repository class for managing the storage and retrieval of performance data
@@ -37,7 +35,7 @@ class FrameTempRepository(
 
     // Flag indicating whether the repository is currently storing data.
     private var isStoring = false
-    // The job resposible for running the data storage task
+    // The job responsible for running the data storage task
     private var storageJob: Job? = null
     // The buffer that holds performance data waiting to be stored
     private val dataBuffer = mutableListOf<FrameTempData>()

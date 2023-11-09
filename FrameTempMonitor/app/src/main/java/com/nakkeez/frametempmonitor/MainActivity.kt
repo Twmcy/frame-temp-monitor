@@ -5,7 +5,6 @@ import android.net.Uri
 import android.os.*
 import androidx.appcompat.app.AppCompatActivity
 import android.provider.Settings
-import android.util.Log
 import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
@@ -15,14 +14,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nakkeez.frametempmonitor.data.FrameTempDatabase
 import com.nakkeez.frametempmonitor.model.BatteryTempUpdater
 import com.nakkeez.frametempmonitor.data.FrameTempRepository
-import com.nakkeez.frametempmonitor.model.CpuTemperature
 import com.nakkeez.frametempmonitor.model.CpuTemperature.Companion.getCpuTemperature
 import com.nakkeez.frametempmonitor.model.FrameRateHandler
 import com.nakkeez.frametempmonitor.preferences.SettingsActivity
 import com.nakkeez.frametempmonitor.service.OverlayService
 import com.nakkeez.frametempmonitor.viewmodel.FrameTempViewModel
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.util.*
 
 /**
