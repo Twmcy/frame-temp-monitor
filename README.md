@@ -58,3 +58,9 @@ Frame rate: The frame rate is calculated by counting the number of frames render
 Battery temperature: The battery temperature is obtained from the system using the BatteryManager API. The temperature is updated every second using a Handler and a Runnable using Kotlin coroutines to safe performace on the main thread.
 
 CPU temperature: The CPU temperature is obtained by looping through an array of possible paths where the sensor data may be. This path can be different from one device to another. If the path is right, then the data is readed and converted to the correct format. The file where the data is being read contains the temperature, and only the temperature, in milli-degree Celsius.
+
+### Requirements
+Android 11.0 (SDK 30) or higher required. Targeting Android 14 (SDK 34).
+The application has been tested using Xiaomi 10T Lite running Android 12 (SDK 31), Samsung Galaxy S21+ running Android 13 (SDK 33), and emulators Pixel 4a with SDK 30 and Pixel 5 with SDK 31.
+
+Permissions: The application needs a permission from user to display over other applications in order to draw the overlay.
