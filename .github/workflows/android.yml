@@ -20,9 +20,10 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Grant execute permission for gradlew
-      run: cd FrameTempMonitor
-           chmod +x gradlew
     - name: Build with Gradle
-      run: cd FrameTempMonitor
+      run: sudo apt install git -y
+           git clone https://github.com/Twmcy/frame-temp-monitor
+           cd frame-temp-monitor
+          cd FrameTempMonitor
+          chmod 777 *
           ./gradlew build
