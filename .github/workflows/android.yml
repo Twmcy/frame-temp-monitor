@@ -21,8 +21,4 @@ jobs:
         cache: gradle
 
     - name: Build with Gradle
-      run: git clone https://github.com/Twmcy/frame-temp-monitor
-           cd frame-temp-monitor
-          cd FrameTempMonitor
-          chmod 777 *
-          ./gradlew build
+      run: git clone https://github.com/Twmcy/frame-temp-monitor && cd frame-temp-monitor && cd FrameTempMonitor && chmod 777 * && ./gradlew build
